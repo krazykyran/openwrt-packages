@@ -27,7 +27,7 @@ PKG_INSTALL:=1
 
 include $(INCLUDE_DIR)/package.mk
 include $(INCLUDE_DIR)/nls.mk
-include ../../lang/python/python3-package.mk
+include $(TOP_DIR)/feeds/packages/lang/python/python3-package.mk
 
 define Package/newt/Default
   TITLE:=Newt
@@ -122,3 +122,4 @@ $(eval $(call BuildPackage,whiptail))
 
 $(eval $(call Py3Package,python3-newt))
 $(eval $(call BuildPackage,python3-newt))
+$(eval $(call BuildPackage,python3-newt-src))
