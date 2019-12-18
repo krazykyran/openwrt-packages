@@ -122,4 +122,3 @@ $(eval $(call BuildPackage,whiptail))
 
 $(eval $(call Py3Package,python3-newt))
 $(eval $(call BuildPackage,python3-newt))
-$(eval $(call BuildPackage,python3-newt-src))
