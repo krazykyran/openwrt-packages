@@ -10,6 +10,7 @@ include $(INCLUDE_DIR)/kernel.mk
 
 PKG_NAME:=serial-sc16is7xx
 PKG_RELEASE:=1
+PKG_BUILD_DIR=$(LINUX_DIR)/drivers/tty/serial
 
 include $(INCLUDE_DIR)/package.mk
 
@@ -17,7 +18,7 @@ define KernelPackage/$(PKG_NAME)
 	SUBMENU:=Other modules
 	DEPENDS:=+kmod-i2c-core +kmod-regmap
 	TITLE:=NXP SC16IS7xx serial UART bridge SPI/I2C
-	FILES:=$(PKG_BUILD_DIR)/serial-sc16is7xx.ko \
+	FILES:=$(PKG_BUILD_DIR)/sc16is7xx.ko \
 	$(PKG_BUILD_DIR)/serial_core.ko
 	AUTOLOAD:=$(call AutoProbe,sc16is7xx)
 endef
@@ -33,7 +34,7 @@ MAKE_OPTS:= \
 	M="$(PKG_BUILD_DIR)"
 	
 define Build/Prepare
-	$(CP) ./files/* $(PKG_BUILD_DIR)/
+	$(CP) ./files/sc16is7xx.c $(PKG_BUILD_DIR)/
 endef
 
 define Build/Compile
