@@ -28,6 +28,7 @@ define KernelPackage/rsi91x-debugfs
 	TITLE:=Redpine Signals Inc debug support
 	KCONFIG:=CONFIG_RSI_DEBUGFS=y
 	DEPENDS:=+kmod-mac80211 +rs9113-firmware +kmod-rsi91x
+	FILES:=$(LINUX_DIR)/drivers/net/wireless/rsi/rsi_91x.ko
 endef
 
 define KernelPackage/rsi91x-usb
@@ -51,6 +52,7 @@ define KernelPackage/rsi91x-bt-alone
 	TITLE:=Redpine Signals BT alone (classic/LE) mode support
 	KCONFIG:=CONFIG_RSI_BT_ALONE=y
 	DEPENDS:=+kmod-mac80211 +rs9113-firmware +kmod-rsi91x
+	FILES:=$(LINUX_DIR)/drivers/net/wireless/rsi/rsi_91x.ko
 endef
 
 define KernelPackage/rsi91x-coex
@@ -58,6 +60,7 @@ define KernelPackage/rsi91x-coex
 	TITLE:=Redpine Signals Wi-Fi BT Coex support
 	KCONFIG:=CONFIG_RSI_COEX=y
 	DEPENDS:=+kmod-mac80211 +rs9113-firmware +kmod-rsi91x
+	FILES:=$(LINUX_DIR)/drivers/net/wireless/rsi/rsi_91x.ko
 endef
 
 define KernelPackage/rsi91x-wow
@@ -65,6 +68,7 @@ define KernelPackage/rsi91x-wow
 	TITLE:=Redpine Signals WoWLAN support
 	KCONFIG:=CONFIG_RSI_WOW=y
 	DEPENDS:=+kmod-mac80211 +rs9113-firmware +kmod-rsi91x
+	FILES:=$(LINUX_DIR)/drivers/net/wireless/rsi/rsi_91x.ko
 endef
 
 define KernelPackage/rsi91x-zigb
@@ -72,12 +76,14 @@ define KernelPackage/rsi91x-zigb
 	TITLE:=Redpine device support on Zigbee
 	KCONFIG:=CONFIG_RSI_ZIGB=y
 	DEPENDS:=+kmod-mac80211 +rs9113-firmware +kmod-rsi91x +kmod-rsi91x-coex
+	FILES:=$(LINUX_DIR)/drivers/net/wireless/rsi/rsi_91x.ko
 endef
 
 define Build/Prepare
 	rm -rf $(PKG_BUILD_DIR)
 	mkdir -p $(PKG_BUILD_DIR)
-	rm -rf $(LINUX_DIR)/drivers/net/wireless/rsi/*
+	rm -rf $(LINUX_DIR)/drivers/net/wireless/rsi/*.c
+	rm -rf $(LINUX_DIR)/drivers/net/wireless/rsi/*.h
 	$(CP) ./files/* $(LINUX_DIR)/drivers/net/wireless/rsi
 endef
 
