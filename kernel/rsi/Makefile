@@ -17,14 +17,14 @@ include $(INCLUDE_DIR)/package.mk
 
 define KernelPackage/rsi91x
 	SUBMENU:=Wireless Drivers
-	DEPENDS:=+kmod-mac80211 +rs9113-firmware
+	DEPENDS:=+kmod-mac80211 +kmod-bluetooth +rs9113-firmware
 	TITLE:=Redpine Signals Inc 91x WLAN driver support
 	FILES:=$(PKG_BUILD_DIR)/rsi_91x.ko
 endef
 
 define KernelPackage/rsi91x-usb
 	SUBMENU:=Wireless Drivers
-	DEPENDS:=+kmod-mac80211 +kmod-usb2 +kmod-rsi91x +rs9113-firmware
+	DEPENDS:=+kmod-mac80211 +kmod-usb2 +kmod-rsi91x +kmod-bluetooth +rs9113-firmware
 	TITLE:=Redpine Signals USB bus support
 	FILES:=$(PKG_BUILD_DIR)/rsi_usb.ko
 	AUTOLOAD:=$(call AutoProbe,rsi_usb)
@@ -32,7 +32,7 @@ endef
 
 define KernelPackage/rsi91x-sdio
 	SUBMENU:=Wireless Drivers
-	DEPENDS:=+kmod-mac80211 +kmod-mmc +kmod-rsi91x +rs9113-firmware
+	DEPENDS:=+kmod-mac80211 +kmod-mmc +kmod-rsi91x +kmod-bluetooth +rs9113-firmware
 	TITLE:=Redpine Signals SDIO bus support
 	FILES:=$(PKG_BUILD_DIR)/rsi_sdio.ko
 	AUTOLOAD:=$(call AutoProbe,rsi_sdio)
@@ -53,10 +53,11 @@ define Build/Compile
 	$(MAKE) -C "$(LINUX_DIR)" \
 		$(MAKE_OPTS) \
 		CONFIG_WLAN_VENDOR_RSI=y \
-		CONFIG_RSI_91X=y \
+		CONFIG_RSI_DEBUGFS=y \
 		CONFIG_RSI_COEX=y \
-		CONFIG_RSI_SDIO=y \
-		CONFIG_RSI_USB=y \
+		CONFIG_RSI_91X=m \
+		CONFIG_RSI_SDIO=m \
+		CONFIG_RSI_USB=m \
 		modules
 endef
 

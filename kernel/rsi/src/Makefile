@@ -41,6 +41,13 @@ rsi_91x-$(CONFIG_RSI_COEX)	+= rsi_91x_hci.o
 rsi_91x-$(CONFIG_RSI_ZIGB)	+= rsi_91x_zigb.o
 rsi_91x-$(CONFIG_RSI_11K)	+= rsi_91x_rrm.o
 
+ccflags-$(CONFIG_RSI_DEBUGFS)	+= -DCONFIG_RSI_DEBUGFS
+ccflags-$(CONFIG_RSI_BT_ALONE)	+= -DCONFIG_RSI_BT_ALONE
+ccflags-$(CONFIG_RSI_COEX)	+= -DCONFIG_RSI_COEX
+ccflags-$(CONFIG_RSI_ZIGB)	+= -DCONFIG_RSI_ZIGB
+ccflags-$(CONFIG_RSI_WOW)	+= -DCONFIG_RSI_WOW
+ccflags-$(CONFIG_RSI_11K)	+= -DCONFIG_RSI_11K
+
 rsi_usb-$(CONFIG_RSI_USB)	+= rsi_91x_usb.o rsi_91x_usb_ops.o
 rsi_sdio-$(CONFIG_RSI_SDIO)	+= rsi_91x_sdio.o rsi_91x_sdio_ops.o
 obj-$(CONFIG_RSI_91X) 		+= rsi_91x.o
