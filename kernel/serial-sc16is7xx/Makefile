@@ -11,7 +11,7 @@ include $(INCLUDE_DIR)/kernel.mk
 PKG_NAME:=serial-sc16is7xx
 PKG_RELEASE:=1
 
-PKG_BUILD_DIR:=$(KERNEL_BUILD_DIR)/packages
+PKG_BUILD_DIR:=$(KERNEL_BUILD_DIR)/$(PKG_NAME)
 
 include $(INCLUDE_DIR)/package.mk
 
