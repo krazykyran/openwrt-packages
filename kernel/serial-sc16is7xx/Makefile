@@ -11,6 +11,8 @@ include $(INCLUDE_DIR)/kernel.mk
 PKG_NAME:=serial-sc16is7xx
 PKG_RELEASE:=1
 
+PKG_BUILD_DIR:=$(KERNEL_BUILD_DIR)/packages
+
 include $(INCLUDE_DIR)/package.mk
 
 define KernelPackage/$(PKG_NAME)
@@ -31,27 +33,18 @@ define KernelPackage/$(PKG_NAME)/description
 	serial UART chips connected via I2C or SPI.
 endef
 
-define Build/Clean
-	$(RM) $(LINUX_DIR)/drivers/tty/serial/sc16is7xx.o
-	$(RM) $(LINUX_DIR)/drivers/tty/serial/sc16is7xx.ko
-	$(RM) $(LINUX_DIR)/drivers/tty/serial/sc16is7xx.mod.*
-endef
-
 define Build/Prepare
+	mkdir -p $(PKG_BUILD_DIR)
 	$(CP) ./files/sc16is7xx.c $(LINUX_DIR)/drivers/tty/serial/
 endef
 
+define Build/Configure
+endef
+
 define Build/Compile
-	$(MAKE) -C "$(LINUX_DIR)" \
-		ARCH="$(LINUX_KARCH)" \
-		CROSS_COMPILE="$(TARGET_CROSS)" \
-		M="$(PKG_BUILD_DIR)"
-		CONFIG_SERIAL_SC16IS7XX=y \
-		CONFIG_SERIAL_SC16IS7XX_CORE=y \
-		CONFIG_SERIAL_SC16IS7XX_I2C=y \
-		CONFIG_SERIAL_SC16IS7XX_SPI=y \
-		modules \
-		SUBDIRS=drivers/tty/serial
+endef
+
+define Build/Compile
 endef
 
 $(eval $(call KernelPackage,$(PKG_NAME)))
