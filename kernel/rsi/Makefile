@@ -27,7 +27,7 @@ define KernelPackage/rsi91x-debugfs
 	SUBMENU:=Wireless Drivers
 	TITLE:=Redpine Signals Inc debug support
 	KCONFIG:=CONFIG_RSI_DEBUGFS=y
-	DEPENDS:=+kmod-mac80211 +rs9113-firmware +rsi91x
+	DEPENDS:=+kmod-mac80211 +rs9113-firmware +kmod-rsi91x
 endef
 
 define KernelPackage/rsi91x-usb
@@ -50,28 +50,28 @@ define KernelPackage/rsi91x-bt-alone
 	SUBMENU:=Wireless Drivers
 	TITLE:=Redpine Signals BT alone (classic/LE) mode support
 	KCONFIG:=CONFIG_RSI_BT_ALONE=y
-	DEPENDS:=+kmod-mac80211 +rs9113-firmware +rsi91x
+	DEPENDS:=+kmod-mac80211 +rs9113-firmware +kmod-rsi91x
 endef
 
 define KernelPackage/rsi91x-coex
 	SUBMENU:=Wireless Drivers
 	TITLE:=Redpine Signals Wi-Fi BT Coex support
 	KCONFIG:=CONFIG_RSI_COEX=y
-	DEPENDS:=+kmod-mac80211 +rs9113-firmware +rsi91x
+	DEPENDS:=+kmod-mac80211 +rs9113-firmware +kmod-rsi91x
 endef
 
 define KernelPackage/rsi91x-wow
 	SUBMENU:=Wireless Drivers
 	TITLE:=Redpine Signals WoWLAN support
 	KCONFIG:=CONFIG_RSI_WOW=y
-	DEPENDS:=+kmod-mac80211 +rs9113-firmware +rsi91x
+	DEPENDS:=+kmod-mac80211 +rs9113-firmware +kmod-rsi91x
 endef
 
 define KernelPackage/rsi91x-zigb
 	SUBMENU:=Wireless Drivers
 	TITLE:=Redpine device support on Zigbee
 	KCONFIG:=CONFIG_RSI_ZIGB=y
-	DEPENDS:=+kmod-mac80211 +rs9113-firmware +rsi91x +rsi91x-coex
+	DEPENDS:=+kmod-mac80211 +rs9113-firmware +kmod-rsi91x +kmod-rsi91x-coex
 endef
 
 define Build/Prepare
