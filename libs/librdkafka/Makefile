@@ -22,7 +22,7 @@ include $(INCLUDE_DIR)/package.mk
 define Package/$(PKG_NAME)
     TITLE:=$(PKG_NAME)
     SECTION:=libs
-    DEPENDS:=+libpthread +zlib +librt +libcrypto +libopenssl
+    DEPENDS:=+libpthread +zlib +librt +libopenssl
     CATEGORY:=Libraries
     URL:=https://github.com/edenhill/librdkafka
 endef
