@@ -18,72 +18,42 @@ include $(INCLUDE_DIR)/package.mk
 define KernelPackage/rsi91x
 	SUBMENU:=Wireless Drivers
 	TITLE:=Redpine Signals Inc 91x WLAN driver support
-	KCONFIG:=CONFIG_RSI_91X=y
+	KCONFIG:=CONFIG_WLAN_VENDOR_RSI=y \
+		CONFIG_RSI_91X=y
+		CONFIG_RSI_DEBUGFS=y \
+		CONFIG_RSI_BT_ALONE=n \
+		CONFIG_RSI_COEX=y \
+		CONFIG_RSI_WOW=n \
+		CONFIG_RSI_P2P=n \
+		CONFIG_HW_SCAN_OFFLOAD=n \
+		CONFIG_CARACALLA_BOARD=n \
+		CONFIG_RSI_ZIGB=n
 	DEPENDS:=+kmod-mac80211 +rs9113-firmware
 	FILES:=$(LINUX_DIR)/drivers/net/wireless/rsi/rsi_91x.ko
-endef
-
-define KernelPackage/rsi91x-debugfs
-	SUBMENU:=Wireless Drivers
-	TITLE:=Redpine Signals Inc debug support
-	KCONFIG:=CONFIG_RSI_DEBUGFS=y
-	DEPENDS:=+kmod-mac80211 +rs9113-firmware +kmod-rsi91x
-	FILES:=$(LINUX_DIR)/drivers/net/wireless/rsi/rsi_91x.ko
-endef
-
-define KernelPackage/rsi91x-usb
-	SUBMENU:=Wireless Drivers
-	TITLE:=Redpine Signals USB bus support
-	KCONFIG:=CONFIG_RSI_USB=y
-	DEPENDS:=+kmod-mac80211 +kmod-usb2 +kmod-rsi91x +rs9113-firmware
-	FILES:=$(LINUX_DIR)/drivers/net/wireless/rsi/rsi_usb.ko
 endef
 
 define KernelPackage/rsi91x-sdio
 	SUBMENU:=Wireless Drivers
 	TITLE:=Redpine Signals SDIO bus support
-	KCONFIG:=CONFIG_RSI_SDIO=y
-	DEPENDS:=+kmod-mac80211 +rs9113-firmware
-	FILES:=$(LINUX_DIR)/drivers/net/wireless/rsi/rsi_91x.ko
+	KCONFIG:=CONFIG_WLAN_VENDOR_RSI=y \
+		CONFIG_RSI_SDIO=y
+	DEPENDS:=+kmod-mac80211 +kmod-rsi91x +rs9113-firmware 
+	FILES:=$(LINUX_DIR)/drivers/net/wireless/rsi/rsi_sdio.ko
 endef
 
-define KernelPackage/rsi91x-bt-alone
+define KernelPackage/rsi91x-usb
 	SUBMENU:=Wireless Drivers
-	TITLE:=Redpine Signals BT alone (classic/LE) mode support
-	KCONFIG:=CONFIG_RSI_BT_ALONE=y
-	DEPENDS:=+kmod-mac80211 +rs9113-firmware +kmod-rsi91x
-	FILES:=$(LINUX_DIR)/drivers/net/wireless/rsi/rsi_91x.ko
-endef
-
-define KernelPackage/rsi91x-coex
-	SUBMENU:=Wireless Drivers
-	TITLE:=Redpine Signals Wi-Fi BT Coex support
-	KCONFIG:=CONFIG_RSI_COEX=y
-	DEPENDS:=+kmod-mac80211 +rs9113-firmware +kmod-rsi91x
-	FILES:=$(LINUX_DIR)/drivers/net/wireless/rsi/rsi_91x.ko
-endef
-
-define KernelPackage/rsi91x-wow
-	SUBMENU:=Wireless Drivers
-	TITLE:=Redpine Signals WoWLAN support
-	KCONFIG:=CONFIG_RSI_WOW=y
-	DEPENDS:=+kmod-mac80211 +rs9113-firmware +kmod-rsi91x
-	FILES:=$(LINUX_DIR)/drivers/net/wireless/rsi/rsi_91x.ko
-endef
-
-define KernelPackage/rsi91x-zigb
-	SUBMENU:=Wireless Drivers
-	TITLE:=Redpine device support on Zigbee
-	KCONFIG:=CONFIG_RSI_ZIGB=y
-	DEPENDS:=+kmod-mac80211 +rs9113-firmware +kmod-rsi91x +kmod-rsi91x-coex
-	FILES:=$(LINUX_DIR)/drivers/net/wireless/rsi/rsi_91x.ko
+	TITLE:=Redpine Signals USB bus support
+	KCONFIG:=CONFIG_WLAN_VENDOR_RSI=y \
+		CONFIG_RSI_USB=y
+	DEPENDS:=+kmod-mac80211 +kmod-usb2 +kmod-rsi91x +rs9113-firmware
+	FILES:=$(LINUX_DIR)/drivers/net/wireless/rsi/rsi_usb.ko
 endef
 
 define Build/Prepare
 	rm -rf $(PKG_BUILD_DIR)
 	mkdir -p $(PKG_BUILD_DIR)
-	rm -rf $(LINUX_DIR)/drivers/net/wireless/rsi/*.c
-	rm -rf $(LINUX_DIR)/drivers/net/wireless/rsi/*.h
+	rm -rf $(LINUX_DIR)/drivers/net/wireless/rsi/*
 	$(CP) ./files/* $(LINUX_DIR)/drivers/net/wireless/rsi
 endef
 
@@ -94,10 +64,5 @@ define Build/Compile
 endef
 
 $(eval $(call KernelPackage,rsi91x))
-$(eval $(call KernelPackage,rsi91x-debugfs))
 $(eval $(call KernelPackage,rsi91x-usb))
 $(eval $(call KernelPackage,rsi91x-sdio))
-$(eval $(call KernelPackage,rsi91x-bt-alone))
-$(eval $(call KernelPackage,rsi91x-coex))
-$(eval $(call KernelPackage,rsi91x-wow))
-$(eval $(call KernelPackage,rsi91x-zigb))
