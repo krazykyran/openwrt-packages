@@ -19,41 +19,44 @@ define KernelPackage/rsi91x
 	SUBMENU:=Wireless Drivers
 	DEPENDS:=+kmod-mac80211 +rs9113-firmware
 	TITLE:=Redpine Signals Inc 91x WLAN driver support
-	FILES:=$(LINUX_DIR)/drivers/net/wireless/rsi/rsi_91x.ko
-	KCONFIG:=CONFIG_WLAN_VENDOR_RSI=y \
-		CONFIG_RSI_91X=y
+	FILES:=$(PKG_BUILD_DIR)/rsi_91x.ko
 endef
 
 define KernelPackage/rsi91x-usb
 	SUBMENU:=Wireless Drivers
 	DEPENDS:=+kmod-mac80211 +kmod-usb2 +kmod-rsi91x +rs9113-firmware
 	TITLE:=Redpine Signals USB bus support
-	FILES:=$(LINUX_DIR)/drivers/net/wireless/rsi/rsi_usb.ko
-	KCONFIG:=CONFIG_WLAN_VENDOR_RSI=y \
-		CONFIG_RSI_USB=y
+	FILES:=$(PKG_BUILD_DIR)/rsi_usb.ko
 	AUTOLOAD:=$(call AutoProbe,rsi_usb)
 endef
 
 define KernelPackage/rsi91x-sdio
 	SUBMENU:=Wireless Drivers
-	DEPENDS:=+kmod-mac80211 +kmod-mmc +kmod-rsi91x +rs9113-firmware 
+	DEPENDS:=+kmod-mac80211 +kmod-mmc +kmod-rsi91x +rs9113-firmware
 	TITLE:=Redpine Signals SDIO bus support
-	FILES:=$(LINUX_DIR)/drivers/net/wireless/rsi/rsi_sdio.ko
-	KCONFIG:=CONFIG_WLAN_VENDOR_RSI=y \
-		CONFIG_RSI_SDIO=y
+	FILES:=$(PKG_BUILD_DIR)/rsi_sdio.ko
 	AUTOLOAD:=$(call AutoProbe,rsi_sdio)
 endef
 
 define Build/Prepare
-	rm -rf $(LINUX_DIR)/drivers/net/wireless/rsi/
-	mkdir -p $(LINUX_DIR)/drivers/net/wireless/rsi/
-	$(CP) ./files/* $(LINUX_DIR)/drivers/net/wireless/rsi/
+	rm -rf $(PKG_BUILD_DIR)
+	mkdir -p $(PKG_BUILD_DIR)
+	$(CP) ./src/* $(PKG_BUILD_DIR)/
 endef
 
-define Build/Configure
-endef
+MAKE_OPTS:= \
+	ARCH="$(LINUX_KARCH)" \
+	CROSS_COMPILE="$(TARGET_CROSS)" \
+	SUBDIRS="$(PKG_BUILD_DIR)"
 
 define Build/Compile
+	$(MAKE) -C "$(LINUX_DIR)" \
+		$(MAKE_OPTS) \
+		CONFIG_WLAN_VENDOR_RSI=y \
+		CONFIG_RSI_91X=y \
+		CONFIG_RSI_SDIO=y \
+		CONFIG_RSI_USB=y \
+		modules
 endef
 
 $(eval $(call KernelPackage,rsi91x))
