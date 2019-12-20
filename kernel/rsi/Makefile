@@ -54,6 +54,7 @@ define Build/Compile
 		$(MAKE_OPTS) \
 		CONFIG_WLAN_VENDOR_RSI=y \
 		CONFIG_RSI_91X=y \
+		CONFIG_RSI_COEX=y \
 		CONFIG_RSI_SDIO=y \
 		CONFIG_RSI_USB=y \
 		modules
