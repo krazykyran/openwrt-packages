@@ -31,6 +31,12 @@ define KernelPackage/$(PKG_NAME)/description
 	serial UART chips connected via I2C or SPI.
 endef
 
+define Build/Clean
+	$(RM) $(LINUX_DIR)/drivers/tty/serial/sc16is7xx.o
+	$(RM) $(LINUX_DIR)/drivers/tty/serial/sc16is7xx.ko
+	$(RM) $(LINUX_DIR)/drivers/tty/serial/sc16is7xx.mod.*
+endef
+
 define Build/Prepare
 	$(CP) ./files/sc16is7xx.c $(LINUX_DIR)/drivers/tty/serial/
 endef
