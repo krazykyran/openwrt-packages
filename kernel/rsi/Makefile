@@ -46,7 +46,7 @@ endef
 
 define Build/Prepare
 	mkdir -p $(PKG_BUILD_DIR)
-	$(CP) ./files/* $(PKG_BUILD_DIR)/drivers/net/wireless/rsi
+	$(CP) ./files/* $(LINUX_DIR)/drivers/net/wireless/rsi/
 endef
 
 define Build/Configure
