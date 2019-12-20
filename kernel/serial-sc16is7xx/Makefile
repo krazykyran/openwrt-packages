@@ -10,7 +10,6 @@ include $(INCLUDE_DIR)/kernel.mk
 
 PKG_NAME:=serial-sc16is7xx
 PKG_RELEASE:=1
-PKG_BUILD_DIR=$(LINUX_DIR)/drivers/tty/serial
 
 include $(INCLUDE_DIR)/package.mk
 
@@ -18,8 +17,12 @@ define KernelPackage/$(PKG_NAME)
 	SUBMENU:=Other modules
 	DEPENDS:=+kmod-i2c-core +kmod-regmap
 	TITLE:=NXP SC16IS7xx serial UART bridge SPI/I2C
-	FILES:=$(PKG_BUILD_DIR)/sc16is7xx.ko \
-	$(PKG_BUILD_DIR)/serial_core.ko
+	FILES:=$(LINUX_DIR)/drivers/tty/serial/sc16is7xx.ko \
+	$(LINUX_DIR)/drivers/tty/serial/serial_core.ko
+	KCONFIG:=CONFIG_SERIAL_SC16IS7XX \
+	CONFIG_SERIAL_SC16IS7XX_CORE=y \
+	CONFIG_SERIAL_SC16IS7XX_I2C=y \
+	CONFIG_SERIAL_SC16IS7XX_SPI=y
 	AUTOLOAD:=$(call AutoProbe,sc16is7xx)
 endef
 
@@ -28,23 +31,20 @@ define KernelPackage/$(PKG_NAME)/description
 	serial UART chips connected via I2C or SPI.
 endef
 
-MAKE_OPTS:= \
-	ARCH="$(LINUX_KARCH)" \
-	CROSS_COMPILE="$(TARGET_CROSS)" \
-	M="$(PKG_BUILD_DIR)"
-	
 define Build/Prepare
-	$(CP) ./files/sc16is7xx.c $(PKG_BUILD_DIR)/
+	$(CP) ./files/sc16is7xx.c $(LINUX_DIR)/drivers/tty/serial/
 endef
 
 define Build/Compile
 	$(MAKE) -C "$(LINUX_DIR)" \
-		$(MAKE_OPTS) \
-		CONFIG_SERIAL_SC16IS7XX=m \
+		ARCH="$(LINUX_KARCH)" \
+		CROSS_COMPILE="$(TARGET_CROSS)" \
+		CONFIG_SERIAL_SC16IS7XX=y \
 		CONFIG_SERIAL_SC16IS7XX_CORE=y \
 		CONFIG_SERIAL_SC16IS7XX_I2C=y \
-		CONFIG_SERIAL_SC16IS7XX_SPI=y
-		modules
+		CONFIG_SERIAL_SC16IS7XX_SPI=y \
+		modules \
+		SUBDIRS=drivers/tty/serial
 endef
 
 $(eval $(call KernelPackage,$(PKG_NAME)))
