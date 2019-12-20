@@ -10,7 +10,7 @@ PKG_NAME:=librdkafka
 PKG_VERSION:=0.11.3
 
 PKG_SOURCE:=v$(PKG_VERSION).zip
-PKG_SOURCE_URL:=@GITHUB/edenhill/librdkafka/archive
+PKG_SOURCE_URL:=https://github.com/edenhill/librdkafka/archive
 PKG_SOURCE_VERSION:=0.11.3
 PKG_SOURCE_SUBDIR:=$(PKG_NAME)-$(PKG_VERSION)
 PKG_MD5SUM:=965ce8bd67565e983d8f2bd5ce7bba21
