@@ -7,7 +7,7 @@
 
 include $(TOPDIR)/rules.mk
 
-PKG_NAME:=edge-rs9113-firmware
+PKG_NAME:=rs9113-firmware-edge
 PKG_RELEASE:=1
 
 include $(INCLUDE_DIR)/package.mk
