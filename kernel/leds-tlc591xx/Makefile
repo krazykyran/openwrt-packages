@@ -17,7 +17,7 @@ include $(INCLUDE_DIR)/package.mk
 
 define KernelPackage/$(PKG_NAME)
 	SUBMENU:=LED modules
-	DEPENDS:=+kmod-i2c-core +kmod-regmap
+	DEPENDS:=+kmod-i2c-core +kmod-regmap-i2c
 	TITLE:=TLC591xx LED support
 	KCONFIG:=CONFIG_LEDS_TLC591XX
 	FILES:=$(LINUX_DIR)/drivers/leds/leds-tlc591xx.ko
