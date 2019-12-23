@@ -23,7 +23,7 @@ define Build/Compile
 endef
 
 define Package/$(PKG_NAME)/install
-	$(INSTALL_DIR) $(1)/lib/firmware/rsi
-	$(INSTALL_DATA) ./files/*.rps $(1)/lib/firmware/rsi
+	$(INSTALL_DIR) $(1)/lib/firmware
+	$(INSTALL_DATA) ./files/*.rps $(1)/lib/firmware
 endef
 $(eval $(call BuildPackage,rs9113-firmware))
