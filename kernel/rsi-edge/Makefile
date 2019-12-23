@@ -22,7 +22,7 @@ define KernelPackage/rsi91x-edge
 	FILES:=$(PKG_BUILD_DIR)/rsi_91x.ko
 endef
 
-define KernelPackage/rsi91x-edge-usb
+define KernelPackage/rsi91x-usb-edge
 	SUBMENU:=Wireless Drivers
 	DEPENDS:=+kmod-mac80211 +kmod-usb2 +kmod-rsi91x-edge +kmod-bluetooth +rs9113-firmware-edge
 	TITLE:=Redpine Signals USB bus support (for SAGE EDGE)
@@ -30,7 +30,7 @@ define KernelPackage/rsi91x-edge-usb
 	AUTOLOAD:=$(call AutoProbe,rsi_usb)
 endef
 
-define KernelPackage/rsi91x-edge-sdio
+define KernelPackage/rsi91x-sdio-edge
 	SUBMENU:=Wireless Drivers
 	DEPENDS:=+kmod-mac80211 +kmod-mmc +kmod-rsi91x-edge +kmod-bluetooth +rs9113-firmware-edge
 	TITLE:=Redpine Signals SDIO bus support (for SAGE EDGE)
@@ -63,5 +63,5 @@ define Build/Compile
 endef
 
 $(eval $(call KernelPackage,rsi91x-edge))
-$(eval $(call KernelPackage,rsi91x-edge-usb))
-$(eval $(call KernelPackage,rsi91x-edge-sdio))
+$(eval $(call KernelPackage,rsi91x-usb-edge))
+$(eval $(call KernelPackage,rsi91x-sdio-edge))
