@@ -8,32 +8,32 @@
 include $(TOPDIR)/rules.mk
 include $(INCLUDE_DIR)/kernel.mk
 
-PKG_NAME:=rsi-edge
+PKG_NAME:=edge-rsi
 PKG_RELEASE:=1
 
 PKG_BUILD_DIR:=$(KERNEL_BUILD_DIR)/$(PKG_NAME)
 
 include $(INCLUDE_DIR)/package.mk
 
-define KernelPackage/rsi91x-edge
+define KernelPackage/edge-rsi91x
 	SUBMENU:=Wireless Drivers
-	DEPENDS:=+kmod-mac80211 +kmod-bluetooth +rs9113-firmware-edge +!kmod-rsi91x
-	TITLE:=Redpine Signals Inc 91x WLAN driver support (Driver used by SAGE EDGE)
+	DEPENDS:=+kmod-mac80211 +kmod-bluetooth +edge-rs9113-firmware
+	TITLE:=Redpine Signals Inc 91x WLAN driver support (for SAGE EDGE)
 	FILES:=$(PKG_BUILD_DIR)/rsi_91x.ko
 endef
 
-define KernelPackage/rsi91x-usb-edge
+define KernelPackage/edge-rsi91x-usb
 	SUBMENU:=Wireless Drivers
-	DEPENDS:=+kmod-mac80211 +kmod-usb2 +kmod-rsi91x-edge +kmod-bluetooth +rs9113-firmware-edge +!kmod-rsi91x +!kmod-rsi91x-usb
-	TITLE:=Redpine Signals USB bus support (Driver used by SAGE EDGE)
+	DEPENDS:=+kmod-mac80211 +kmod-usb2 +kmod-edge-rsi91x +kmod-bluetooth +edge-rs9113-firmware
+	TITLE:=Redpine Signals USB bus support (for SAGE EDGE)
 	FILES:=$(PKG_BUILD_DIR)/rsi_usb.ko
 	AUTOLOAD:=$(call AutoProbe,rsi_usb)
 endef
 
-define KernelPackage/rsi91x-sdio-edge
+define KernelPackage/edge-rsi91x-sdio
 	SUBMENU:=Wireless Drivers
-	DEPENDS:=+kmod-mac80211 +kmod-mmc +kmod-rsi91x-edge +kmod-bluetooth +rs9113-firmware-edge +!kmod-rsi91x +!kmod-rsi91x-sdio
-	TITLE:=Redpine Signals SDIO bus support (Driver used by SAGE EDGE)
+	DEPENDS:=+kmod-mac80211 +kmod-mmc +kmod-edge-rsi91x +kmod-bluetooth +edge-rs9113-firmware
+	TITLE:=Redpine Signals SDIO bus support (for SAGE EDGE)
 	FILES:=$(PKG_BUILD_DIR)/rsi_sdio.ko
 	AUTOLOAD:=$(call AutoProbe,rsi_sdio)
 endef
@@ -62,6 +62,6 @@ define Build/Compile
 		modules
 endef
 
-$(eval $(call KernelPackage,rsi91x-edge))
-$(eval $(call KernelPackage,rsi91x-usb-edge))
-$(eval $(call KernelPackage,rsi91x-sdio-edge))
+$(eval $(call KernelPackage,edge-rsi91x))
+$(eval $(call KernelPackage,edge-rsi91x-usb))
+$(eval $(call KernelPackage,edge-rsi91x-sdio))

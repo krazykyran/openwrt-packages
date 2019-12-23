@@ -7,7 +7,7 @@
 
 include $(TOPDIR)/rules.mk
 
-PKG_NAME:=rs9113-firmware-edge
+PKG_NAME:=edge-rs9113-firmware
 PKG_RELEASE:=1
 
 include $(INCLUDE_DIR)/package.mk
@@ -15,8 +15,7 @@ include $(INCLUDE_DIR)/package.mk
 define Package/$(PKG_NAME)
   SECTION:=firmware
   CATEGORY:=Firmware
-  TITLE:=RedPine Signals rs9113 firmware (Firmware used by SAGE EDGE)
-  DEPENDS:=+!rs9113-firmware
+  TITLE:=RedPine Signals rs9113 firmware (for SAGE EDGE)
 endef
 
 define Build/Compile
