@@ -155,9 +155,8 @@ define Build/Configure
 			-skip qtdoc \
 			-skip qtconnectivity \
 			-skip wayland \
+			-skip wayland \
 			-skip qtscript \
-			-sql-mysql \
-			-I$(STAGING_DIR)/usr/include/mysql \
 			-L$(STAGING_DIR)/usr/lib \
 			-v \
 	)
