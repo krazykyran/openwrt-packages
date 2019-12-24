@@ -21,7 +21,10 @@ PKG_USE_MIPS16:=0
 PKG_BUILD_DEPENDS:=libiconv
 
 include $(INCLUDE_DIR)/package.mk
--include $(if $(DUMP),,./files/qmake.mk)
+include $(INCLUDE_DIR)/nls.mk
+#include $(TARGET_LDFLAGS)/nls.mk
+
+#-include $(if $(DUMP),,./files/qmake.mk)
 
 # not using sstrip here as this fucks up the .so's somehow
 STRIP:=/bin/true
@@ -37,7 +40,7 @@ define Package/$(PKG_NAME)/Default
   SUBMENU:=Qt5
   TITLE:=qt5
   URL:=http://qt-project.org
-  DEPENDS:=+librt +zlib +libstdcpp +libpthread +libpcre2-16 @!LINUX_2_6
+  DEPENDS:=+librt +zlib +libstdcpp +libpcre16 +libpthread +libatomic +libmysqlclient @!LINUX_2_6
 endef
 
 define Package/$(PKG_NAME)-core
