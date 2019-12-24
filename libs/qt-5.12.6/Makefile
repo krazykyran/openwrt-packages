@@ -8,14 +8,14 @@
 
 include $(TOPDIR)/rules.mk
 
-PKG_NAME:=qt5
-PKG_VERSION:=5.9
-PKG_RELEASE:=5
+PKG_VERSION:=5.12
+PKG_RELEASE:=6
+PKG_NAME:=qt-$(PKG_VERSION).$(PKG_RELEASE)
 PKG_MD5SUM:=0e6eaa2d118f9854345c2debb12e8536
 
-PKG_SOURCE:=qt-everywhere-opensource-src-$(PKG_VERSION).$(PKG_RELEASE).tar.xz
+PKG_SOURCE:=qt-everywhere-src-$(PKG_VERSION).$(PKG_RELEASE).tar.xz
 PKG_SOURCE_URL:=http://download.qt.io/archive/qt/$(PKG_VERSION)/$(PKG_VERSION).$(PKG_RELEASE)/single
-PKG_BUILD_DIR=$(BUILD_DIR)/qt-everywhere-opensource-src-$(PKG_VERSION).$(PKG_RELEASE)
+PKG_BUILD_DIR=$(BUILD_DIR)/qt-everywhere-src-$(PKG_VERSION).$(PKG_RELEASE)
 PKG_BUILD_PARALLEL:=1
 PKG_USE_MIPS16:=0
 #PKG_BUILD_DEPENDS:=+libstdcpp
