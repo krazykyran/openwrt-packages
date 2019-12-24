@@ -31,7 +31,7 @@ RSTRIP:= \
   STRIP_KMOD="$(STRIP)" \
   $(SCRIPT_DIR)/rstrip.sh
 
-define Package/qt$(PKG_VERSION)/Default
+define Package/$(PKG_NAME)/Default
   SECTION:=libs
   CATEGORY:=Libraries
   SUBMENU:=Qt5
@@ -40,57 +40,57 @@ define Package/qt$(PKG_VERSION)/Default
   DEPENDS:=+librt +zlib +libstdcpp +libpthread +libpcre2-16 @!LINUX_2_6
 endef
 
-define Package/qt$(PKG_VERSION)-core
-  $(call Package/qt$(PKG_VERSION)/Default)
+define Package/$(PKG_NAME)-core
+  $(call Package/$(PKG_NAME)/Default)
   TITLE+=core
 endef
 
-define Package/qt$(PKG_VERSION)-concurrent
-  $(call Package/qt$(PKG_VERSION)/Default)
+define Package/$(PKG_NAME)-concurrent
+  $(call Package/$(PKG_NAME)/Default)
   TITLE+=concurrent
-  DEPENDS+=+qt$(PKG_VERSION)-core
+  DEPENDS+=+$(PKG_NAME)-core
 endef
 
-define Package/qt$(PKG_VERSION)-network
-  $(call Package/qt$(PKG_VERSION)/Default)
+define Package/$(PKG_NAME)-network
+  $(call Package/qt-$(PKG_VERSION).$(PKG_RELEASE)/Default)
   TITLE+=network
-  DEPENDS+=+qt$(PKG_VERSION)-core
+  DEPENDS+=+$(PKG_NAME)-core
 endef
 
-define Package/qt$(PKG_VERSION)-serialport
-  $(call Package/qt$(PKG_VERSION)/Default)
+define Package/$(PKG_NAME)-serialport
+  $(call Package/$(PKG_NAME)/Default)
   TITLE+=serialport
-  DEPENDS+=+qt$(PKG_VERSION)-core
+  DEPENDS+=+$(PKG_NAME)-core
 endef
 
-define Package/qt$(PKG_VERSION)-widgets
-  $(call Package/qt5/Default)
+define Package/$(PKG_NAME)-widgets
+  $(call Package/$(PKG_NAME)/Default)
   TITLE+=widgets
-  DEPENDS+=+qt$(PKG_VERSION)-core +qt$(PKG_VERSION)-network
+  DEPENDS+=+$(PKG_NAME)-core +$(PKG_NAME)-network
 endef
 
-define Package/qt$(PKG_VERSION)-sql
-  $(call Package/qt$(PKG_VERSION)/Default)
+define Package/$(PKG_NAME)-sql
+  $(call Package/$(PKG_NAME)/Default)
   TITLE+=sql
-  DEPENDS+=+qt$(PKG_VERSION)-core
+  DEPENDS+=+$(PKG_NAME)-core
 endef
 
-define Package/qt$(PKG_VERSION)-xml
-  $(call Package/qt$(PKG_VERSION)/Default)
+define Package/$(PKG_NAME)-xml
+  $(call Package/$(PKG_NAME)/Default)
   TITLE+=xml
-  DEPENDS+=+qt$(PKG_VERSION)-core
+  DEPENDS+=+$(PKG_NAME)-core
 endef
 
-define Package/qt$(PKG_VERSION)-xmlpatterns
-  $(call Package/qt$(PKG_VERSION)/Default)
+define Package/$(PKG_NAME)-xmlpatterns
+  $(call Package/$(PKG_NAME)/Default)
   TITLE+=xmlpatterns
-  DEPENDS+=+qt$(PKG_VERSION)-core +qt$(PKG_VERSION)-network
+  DEPENDS+=+$(PKG_NAME)-core +$(PKG_NAME)-network
 endef
 
-define Package/qt$(PKG_VERSION)-test
-  $(call Package/qt$(PKG_VERSION)/Default)
+define Package/$(PKG_NAME)-test
+  $(call Package/$(PKG_NAME)/Default)
   TITLE+=test
-  DEPENDS+=+qt$(PKG_VERSION)-core
+  DEPENDS+=+$(PKG_NAME)-core
 endef
 
 define Build/Configure
@@ -173,35 +173,35 @@ define Build/InstallDev
 	$(CP) $(PKG_BUILD_DIR)/qtbase/bin/qmake $(TOOLCHAIN_DIR)/bin/
 endef
 
-define Package/qt$(PKG_VERSION)-core/install
+define Package/$(PKG_NAME)-core/install
 	$(INSTALL_DIR) $(1)/usr/lib/
 	$(CP) $(PKG_BUILD_DIR)/qtbase/lib/libQt5Core.so* $(1)/usr/lib/
 	$(CP) $(PKG_BUILD_DIR)/qtbase/lib/libQt5Core.prl $(1)/usr/lib/
 	$(CP) $(PKG_BUILD_DIR)/qtbase/lib/libQt5Core.la $(1)/usr/lib/
 endef
 
-define Package/qt$(PKG_VERSION)-concurrent/install
+define Package/$(PKG_NAME)-concurrent/install
 	$(INSTALL_DIR) $(1)/usr/lib/
 	$(CP) $(PKG_BUILD_DIR)/qtbase/lib/libQt5Concurrent.so* $(1)/usr/lib/
 	$(CP) $(PKG_BUILD_DIR)/qtbase/lib/libQt5Concurrent.prl $(1)/usr/lib/
 	$(CP) $(PKG_BUILD_DIR)/qtbase/lib/libQt5Concurrent.la $(1)/usr/lib/
 endef
 
-define Package/qt$(PKG_VERSION)-network/install
+define Package/$(PKG_NAME)-network/install
 	$(INSTALL_DIR) $(1)/usr/lib/
 	$(CP) $(PKG_BUILD_DIR)/qtbase/lib/libQt5Network.so* $(1)/usr/lib/
 	$(CP) $(PKG_BUILD_DIR)/qtbase/lib/libQt5Network.prl $(1)/usr/lib/
 	$(CP) $(PKG_BUILD_DIR)/qtbase/lib/libQt5Network.la $(1)/usr/lib/
 endef
 
-define Package/qt$(PKG_VERSION)-serialport/install
+define Package/$(PKG_NAME)-serialport/install
 	$(INSTALL_DIR) $(1)/usr/lib/
 	$(CP) $(PKG_BUILD_DIR)/qtserialport/lib/libQt5SerialPort.so* $(1)/usr/lib/
 	$(CP) $(PKG_BUILD_DIR)/qtserialport/lib/libQt5SerialPort.prl $(1)/usr/lib/
 	$(CP) $(PKG_BUILD_DIR)/qtserialport/lib/libQt5SerialPort.la $(1)/usr/lib/
 endef
 
-define Package/qt$(PKG_VERSION)-widgets/install
+define Package/$(PKG_NAME)-widgets/install
 	$(INSTALL_DIR) $(1)/usr/lib/
 	$(INSTALL_DIR) $(1)/usr/lib/Qt/plugins/generic/
 	$(INSTALL_DIR) $(1)/usr/lib/Qt/plugins/platforms/
@@ -222,7 +222,7 @@ define Package/qt$(PKG_VERSION)-widgets/install
 	$(CP) $(PKG_BUILD_DIR)/qtbase/lib/fonts/* $(1)/usr/lib/fonts/
 endef
 
-define Package/qt$(PKG_VERSION)-sql/install
+define Package/$(PKG_NAME)-sql/install
 	$(INSTALL_DIR) $(1)/usr/lib/
 	$(INSTALL_DIR) $(1)/usr/lib/Qt/plugins/sqldrivers/
 	$(CP) $(PKG_BUILD_DIR)/qtbase/lib/libQt5Sql.so* $(1)/usr/lib/
@@ -231,33 +231,33 @@ define Package/qt$(PKG_VERSION)-sql/install
 	$(CP) $(PKG_BUILD_DIR)/qtbase/plugins/sqldrivers/*.so $(1)/usr/lib/Qt/plugins/sqldrivers/
 endef
 
-define Package/qt$(PKG_VERSION)-xml/install
+define Package/$(PKG_NAME)-xml/install
 	$(INSTALL_DIR) $(1)/usr/lib/
 	$(CP) $(PKG_BUILD_DIR)/qtbase/lib/libQt5Xml.so* $(1)/usr/lib/
 	$(CP) $(PKG_BUILD_DIR)/qtbase/lib/libQt5Xml.prl $(1)/usr/lib/
 	$(CP) $(PKG_BUILD_DIR)/qtbase/lib/libQt5Xml.la 	$(1)/usr/lib/
 endef
 
-define Package/qt$(PKG_VERSION)-xmlpatterns/install
+define Package/$(PKG_NAME)-xmlpatterns/install
 	$(INSTALL_DIR) $(1)/usr/lib/
 	$(CP) $(PKG_BUILD_DIR)/qtxmlpatterns/lib/libQt5XmlPatterns.so* $(1)/usr/lib/
 	$(CP) $(PKG_BUILD_DIR)/qtxmlpatterns/lib/libQt5XmlPatterns.prl $(1)/usr/lib/
 	$(CP) $(PKG_BUILD_DIR)/qtxmlpatterns/lib/libQt5XmlPatterns.la $(1)/usr/lib/
 endef
 
-define Package/qt$(PKG_VERSION)-test/install
+define Package/$(PKG_NAME)-test/install
 	$(INSTALL_DIR) $(1)/usr/lib/
 	$(CP) $(PKG_BUILD_DIR)/qtbase/lib/libQt5Test.so* $(1)/usr/lib/
 	$(CP) $(PKG_BUILD_DIR)/qtbase/lib/libQt5Test.prl $(1)/usr/lib/
 	$(CP) $(PKG_BUILD_DIR)/qtbase/lib/libQt5Test.la $(1)/usr/lib/
 endef
 
-$(eval $(call BuildPackage,qt$(PKG_VERSION)-core))
-$(eval $(call BuildPackage,qt$(PKG_VERSION)-concurrent))
-$(eval $(call BuildPackage,qt$(PKG_VERSION)-network))
-$(eval $(call BuildPackage,qt$(PKG_VERSION)-serialport))
-$(eval $(call BuildPackage,qt$(PKG_VERSION)-widgets))
-$(eval $(call BuildPackage,qt$(PKG_VERSION)-sql))
-$(eval $(call BuildPackage,qt$(PKG_VERSION)-xml))
-$(eval $(call BuildPackage,qt$(PKG_VERSION)-xmlpatterns))
-$(eval $(call BuildPackage,qt$(PKG_VERSION)-test))
+$(eval $(call BuildPackage,$(PKG_NAME)-core))
+$(eval $(call BuildPackage,$(PKG_NAME)-concurrent))
+$(eval $(call BuildPackage,$(PKG_NAME)-network))
+$(eval $(call BuildPackage,$(PKG_NAME)-serialport))
+$(eval $(call BuildPackage,$(PKG_NAME)-widgets))
+$(eval $(call BuildPackage,$(PKG_NAME)-sql))
+$(eval $(call BuildPackage,$(PKG_NAME)-xml))
+$(eval $(call BuildPackage,$(PKG_NAME)-xmlpatterns))
+$(eval $(call BuildPackage,$(PKG_NAME)-test))
