@@ -1,6 +1,7 @@
 #
 # Copyright (C) 2013 Riccardo Ferrazzo <f.riccardo87@gmail.com>
 # Copyright (C) 2017 Paweł Knioła <pawel.kn@gmail.com>
+# Copyright (C) 2019 Simon Crawley <simon.crawley@gotosage.com>
 #
 # This is free software, licensed under the GNU General Public License v2.
 # See /LICENSE for more information.
@@ -8,20 +9,21 @@
 
 include $(TOPDIR)/rules.mk
 
-PKG_VERSION:=5.9
-PKG_RELEASE:=5
+PKG_VERSION:=5.12
+PKG_RELEASE:=6
 PKG_NAME:=qt5
-PKG_MD5SUM:=0e6eaa2d118f9854345c2debb12e8536
+PKG_MD5SUM:=287d71e71ebd97f77220873e7b131b1a
 
-PKG_SOURCE:=qt-everywhere-opensource-src-$(PKG_VERSION).$(PKG_RELEASE).tar.xz
+PKG_SOURCE:=qt-everywhere-src-$(PKG_VERSION).$(PKG_RELEASE).tar.xz
 PKG_SOURCE_URL:=http://download.qt.io/archive/qt/$(PKG_VERSION)/$(PKG_VERSION).$(PKG_RELEASE)/single
-PKG_BUILD_DIR=$(BUILD_DIR)/qt-everywhere-opensource-src-$(PKG_VERSION).$(PKG_RELEASE)
+PKG_BUILD_DIR=$(BUILD_DIR)/qt-everywhere-src-$(PKG_VERSION).$(PKG_RELEASE)
 PKG_BUILD_PARALLEL:=1
 PKG_USE_MIPS16:=0
-#PKG_BUILD_DEPENDS:=+libstdcpp
+PKG_BUILD_DEPENDS:=libiconv
 
 include $(INCLUDE_DIR)/package.mk
--include $(if $(DUMP),,./files/qmake.mk)
+include $(INCLUDE_DIR)/nls.mk
+#-include $(if $(DUMP),,./files/qmake.mk)
 
 # not using sstrip here as this fucks up the .so's somehow
 STRIP:=/bin/true
@@ -37,7 +39,7 @@ define Package/$(PKG_NAME)/Default
   SUBMENU:=Qt5
   TITLE:=qt5
   URL:=http://qt-project.org
-  DEPENDS:=+librt +zlib +libstdcpp +libpthread @!LINUX_2_6
+  DEPENDS:=+librt +zlib +libstdcpp +libpcre16 +libpcre2-16 +libpthread +libatomic @!LINUX_2_6
 endef
 
 define Package/$(PKG_NAME)-core
@@ -125,7 +127,6 @@ define Build/Configure
 			-no-iconv \
 			-no-pch \
 			-no-rpath \
-			-no-qml-debug \
 			-no-strip \
 			-no-cups \
 			-no-dbus \
@@ -134,6 +135,7 @@ define Build/Configure
 			-no-opengl \
 			-no-directfb \
 			-no-xcb \
+			-no-ssl \
 			-qt-zlib \
 			-qt-freetype \
 			-make libs \
@@ -146,6 +148,7 @@ define Build/Configure
 			-skip qtconnectivity \
 			-skip wayland \
 			-skip qtscript \
+			-L$(STAGING_DIR)/usr/lib \
 			-v \
 	)
 endef
@@ -164,12 +167,13 @@ define Build/Compile
 	STAGING_DIR="$(STAGING_DIR)" \
 	STAGING_DIR_HOST="$(STAGING_DIR)/../host" \
 	PKG_CONFIG_SYSROOT="$(STAGING_DIR)" \
-	$(MAKE) -C $(PKG_BUILD_DIR)
+	$(MAKE) -j4 -C $(PKG_BUILD_DIR)
 endef
 
 define Build/InstallDev
 	$(MAKE) -C $(PKG_BUILD_DIR) install
 	$(CP) $(PKG_BUILD_DIR)/qtbase/bin/qmake $(TOOLCHAIN_DIR)/bin/
+	$(CP) $(PKG_BUILD_DIR)/qtbase/bin/qt.conf $(TOOLCHAIN_DIR)/bin/
 endef
 
 define Package/$(PKG_NAME)-core/install
