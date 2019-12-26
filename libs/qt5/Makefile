@@ -8,23 +8,20 @@
 
 include $(TOPDIR)/rules.mk
 
-PKG_VERSION:=5.12
-PKG_RELEASE:=6
-PKG_NAME:=qt-$(PKG_VERSION).$(PKG_RELEASE)
-PKG_MD5SUM:=287d71e71ebd97f77220873e7b131b1a
+PKG_VERSION:=5.9
+PKG_RELEASE:=5
+PKG_NAME:=qt5
+PKG_MD5SUM:=0e6eaa2d118f9854345c2debb12e8536
 
-PKG_SOURCE:=qt-everywhere-src-$(PKG_VERSION).$(PKG_RELEASE).tar.xz
+PKG_SOURCE:=qt-everywhere-opensource-src-$(PKG_VERSION).$(PKG_RELEASE).tar.xz
 PKG_SOURCE_URL:=http://download.qt.io/archive/qt/$(PKG_VERSION)/$(PKG_VERSION).$(PKG_RELEASE)/single
-PKG_BUILD_DIR=$(BUILD_DIR)/qt-everywhere-src-$(PKG_VERSION).$(PKG_RELEASE)
+PKG_BUILD_DIR=$(BUILD_DIR)/qt-everywhere-opensource-src-$(PKG_VERSION).$(PKG_RELEASE)
 PKG_BUILD_PARALLEL:=1
 PKG_USE_MIPS16:=0
-PKG_BUILD_DEPENDS:=libiconv
+PKG_BUILD_DEPENDS:=+libstdcpp
 
 include $(INCLUDE_DIR)/package.mk
-include $(INCLUDE_DIR)/nls.mk
-#include $(TARGET_LDFLAGS)/nls.mk
-
-#-include $(if $(DUMP),,./files/qmake.mk)
+-include $(if $(DUMP),,./files/qmake.mk)
 
 # not using sstrip here as this fucks up the .so's somehow
 STRIP:=/bin/true
@@ -40,7 +37,7 @@ define Package/$(PKG_NAME)/Default
   SUBMENU:=Qt5
   TITLE:=qt5
   URL:=http://qt-project.org
-  DEPENDS:=+librt +zlib +libstdcpp +libpcre16 +libpcre2-16 +libpthread +libatomic @!LINUX_2_6
+  DEPENDS:=+librt +zlib +libstdcpp +libpthread @!LINUX_2_6
 endef
 
 define Package/$(PKG_NAME)-core
@@ -55,15 +52,9 @@ define Package/$(PKG_NAME)-concurrent
 endef
 
 define Package/$(PKG_NAME)-network
-  $(call Package/qt-$(PKG_VERSION).$(PKG_RELEASE)/Default)
+  $(call Package/$(PKG_NAME)/Default)
   TITLE+=network
   DEPENDS+=+$(PKG_NAME)-core
-endef
-
-define Package/$(PKG_NAME)-serialbus
-  $(call Package/$(PKG_NAME)/Default)
-  TITLE+=serialbus
-  DEPENDS+=+$(PKG_NAME)-core +$(PKG_NAME)-network +$(PKG_NAME)-serialport
 endef
 
 define Package/$(PKG_NAME)-serialport
@@ -120,7 +111,7 @@ define Build/Configure
 		TARGET_LDFLAGS="$(TARGET_LDFLAGS) $(EXTRA_LDFLAGS) -lpthread -lrt" \
 		TARGET_INCDIRS="$(TARGET_INCDIRS)" \
 		TARGET_LIBDIRS="$(TARGET_LIBDIRS) $(STAGING_DIR)/usr/lib/" \
-		CFLAGS="$(TARGET_CFLAGS) $(TARGET_CPPFLAGS)" \
+		CFLAGS= \
 		CXXFLAGS= \
 		LDFLAGS= \
 		./configure \
@@ -128,13 +119,14 @@ define Build/Configure
 			-extprefix $(TOOLCHAIN_DIR) \
 			-sysroot $(TOOLCHAIN_DIR) \
 			-plugindir /usr/lib/Qt/plugins \
-			-xplatform linux-openwrt-g++ \
+			-device linux-rasp-pi2-g++ \
+			-device-option CROSS_COMPILE=$(TARGET_CROSS) \
 			-opensource \
 			-confirm-license \
-			-force-asserts \
 			-no-iconv \
 			-no-pch \
 			-no-rpath \
+			-no-qml-debug \
 			-no-strip \
 			-no-cups \
 			-no-dbus \
@@ -143,7 +135,6 @@ define Build/Configure
 			-no-opengl \
 			-no-directfb \
 			-no-xcb \
-			-no-ssl \
 			-qt-zlib \
 			-qt-freetype \
 			-make libs \
@@ -155,9 +146,7 @@ define Build/Configure
 			-skip qtdoc \
 			-skip qtconnectivity \
 			-skip wayland \
-			-skip wayland \
 			-skip qtscript \
-			-L$(STAGING_DIR)/usr/lib \
 			-v \
 	)
 endef
@@ -176,16 +165,12 @@ define Build/Compile
 	STAGING_DIR="$(STAGING_DIR)" \
 	STAGING_DIR_HOST="$(STAGING_DIR)/../host" \
 	PKG_CONFIG_SYSROOT="$(STAGING_DIR)" \
-	TARGET_CPPFLAGS+="-I$(STAGING_DIR)/usr/include/mysql" \
-	TARGET_LDFLAGS+="-L$(STAGING_DIR)/usr/lib/mysql -lmysqlclient" \
-	CFLAGS="$(TARGET_CFLAGS) $(TARGET_CPPFLAGS)" \
-	$(MAKE) -j4 -C $(PKG_BUILD_DIR)
+	$(MAKE) -C $(PKG_BUILD_DIR)
 endef
 
 define Build/InstallDev
 	$(MAKE) -C $(PKG_BUILD_DIR) install
 	$(CP) $(PKG_BUILD_DIR)/qtbase/bin/qmake $(TOOLCHAIN_DIR)/bin/
-	$(CP) $(PKG_BUILD_DIR)/qtbase/bin/qt.conf $(TOOLCHAIN_DIR)/bin/
 endef
 
 define Package/$(PKG_NAME)-core/install
@@ -214,13 +199,6 @@ define Package/$(PKG_NAME)-serialport/install
 	$(CP) $(PKG_BUILD_DIR)/qtserialport/lib/libQt5SerialPort.so* $(1)/usr/lib/
 	$(CP) $(PKG_BUILD_DIR)/qtserialport/lib/libQt5SerialPort.prl $(1)/usr/lib/
 	$(CP) $(PKG_BUILD_DIR)/qtserialport/lib/libQt5SerialPort.la $(1)/usr/lib/
-endef
-
-define Package/$(PKG_NAME)-serialbus/install
-	$(INSTALL_DIR) $(1)/usr/lib/
-	$(CP) $(PKG_BUILD_DIR)/qtserialbus/lib/libQt5SerialBus.so* $(1)/usr/lib/
-	$(CP) $(PKG_BUILD_DIR)/qtserialbus/lib/libQt5SerialBus.prl $(1)/usr/lib/
-	$(CP) $(PKG_BUILD_DIR)/qtserialbus/lib/libQt5SerialBus.la $(1)/usr/lib/
 endef
 
 define Package/$(PKG_NAME)-widgets/install
@@ -278,7 +256,6 @@ $(eval $(call BuildPackage,$(PKG_NAME)-core))
 $(eval $(call BuildPackage,$(PKG_NAME)-concurrent))
 $(eval $(call BuildPackage,$(PKG_NAME)-network))
 $(eval $(call BuildPackage,$(PKG_NAME)-serialport))
-$(eval $(call BuildPackage,$(PKG_NAME)-serialbus))
 $(eval $(call BuildPackage,$(PKG_NAME)-widgets))
 $(eval $(call BuildPackage,$(PKG_NAME)-sql))
 $(eval $(call BuildPackage,$(PKG_NAME)-xml))
