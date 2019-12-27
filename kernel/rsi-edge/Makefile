@@ -8,32 +8,32 @@
 include $(TOPDIR)/rules.mk
 include $(INCLUDE_DIR)/kernel.mk
 
-PKG_NAME:=rsi
+PKG_NAME:=rsi-edge
 PKG_RELEASE:=1
 
 PKG_BUILD_DIR:=$(KERNEL_BUILD_DIR)/$(PKG_NAME)
 
 include $(INCLUDE_DIR)/package.mk
 
-define KernelPackage/rsi91x
+define KernelPackage/rsi91x-edge
 	SUBMENU:=Wireless Drivers
-	DEPENDS:=+kmod-mac80211 +kmod-bluetooth +rs9113-firmware
-	TITLE:=Redpine Signals Inc 91x WLAN driver support
+	DEPENDS:=+kmod-mac80211 +kmod-bluetooth +rs9113-firmware-edge
+	TITLE:=Redpine Signals Inc 91x WLAN driver support (for SAGE EDGE)
 	FILES:=$(PKG_BUILD_DIR)/rsi_91x.ko
 endef
 
-define KernelPackage/rsi91x-usb
+define KernelPackage/rsi91x-usb-edge
 	SUBMENU:=Wireless Drivers
-	DEPENDS:=+kmod-mac80211 +kmod-usb2 +kmod-rsi91x +kmod-bluetooth +rs9113-firmware
-	TITLE:=Redpine Signals USB bus support
+	DEPENDS:=+kmod-mac80211 +kmod-usb2 +kmod-rsi91x-edge +kmod-bluetooth +rs9113-firmware-edge
+	TITLE:=Redpine Signals USB bus support (for SAGE EDGE)
 	FILES:=$(PKG_BUILD_DIR)/rsi_usb.ko
 	AUTOLOAD:=$(call AutoProbe,rsi_usb)
 endef
 
-define KernelPackage/rsi91x-sdio
+define KernelPackage/rsi91x-sdio-edge
 	SUBMENU:=Wireless Drivers
-	DEPENDS:=+kmod-mac80211 +kmod-mmc +kmod-rsi91x +kmod-bluetooth +rs9113-firmware
-	TITLE:=Redpine Signals SDIO bus support
+	DEPENDS:=+kmod-mac80211 +kmod-mmc +kmod-rsi91x-edge +kmod-bluetooth +rs9113-firmware-edge
+	TITLE:=Redpine Signals SDIO bus support (for SAGE EDGE)
 	FILES:=$(PKG_BUILD_DIR)/rsi_sdio.ko
 	AUTOLOAD:=$(call AutoProbe,rsi_sdio)
 endef
@@ -62,6 +62,6 @@ define Build/Compile
 		modules
 endef
 
-$(eval $(call KernelPackage,rsi91x))
-$(eval $(call KernelPackage,rsi91x-usb))
-$(eval $(call KernelPackage,rsi91x-sdio))
+$(eval $(call KernelPackage,rsi91x-edge))
+$(eval $(call KernelPackage,rsi91x-usb-edge))
+$(eval $(call KernelPackage,rsi91x-sdio-edge))
