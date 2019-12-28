@@ -12,7 +12,7 @@ define Package/gcc/description
 endef
 
 
-define Package/gcc
+define Package/gcc-7.3.0
   SECTION:=devel
   CATEGORY:=Development
   TITLE:=gcc-7.3.0
@@ -184,7 +184,7 @@ ENVCFLAGS+="
 
 ENVLDFLAGS:="-Wl,-rpath=/usr/lib -Wl,--dynamic-linker=/usr/lib/$(DYNLINKER) -L/usr/lib, -lstdc++"
 
-define Package/gcc/install
+define Package/gcc-7.3.0/install
 	$(INSTALL_DIR) $(1)/usr/bin $(1)/usr/lib $(1)/usr/lib/$(PKG_NAME)/$(REAL_GNU_TARGET_NAME)/$(PKG_VERSION)
 	cp -ar $(PKG_INSTALL_DIR)/usr/include $(1)/usr
 	cp -a $(PKG_INSTALL_DIR)/usr/bin/{$(REAL_GNU_TARGET_NAME)-{g++,gcc},cpp,gcov} $(1)/usr/bin
@@ -209,14 +209,14 @@ define Package/gcc/install
 	chmod +x $(1)/usr/bin/gcc_env.sh
 endef
 
-define Package/gcc/postinst
+define Package/gcc-7.3.0/postinst
 	#!/bin/sh
 	$(INSTALL_STATIC_SPEC)
 endef
 
-define Package/gcc/postrm
+define Package/gcc-7.3.0/postrm
 	#!/bin/sh
 	$(REMOVE_STATIC_SPEC)
 endef
 
-$(eval $(call BuildPackage,gcc))
+$(eval $(call BuildPackage,gcc-7.3.0))
