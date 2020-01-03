@@ -37,12 +37,18 @@ define Package/$(PKG_NAME)/Default
   SUBMENU:=Qt5
   TITLE:=qt5
   URL:=http://qt-project.org
-  DEPENDS:=+librt +zlib +libstdcpp +libpthread +libpcre16 +libpcre2-16 @!LINUX_2_6
+  DEPENDS:=+librt +zlib +libstdcpp +libpthread @!LINUX_2_6
 endef
+
+
+libatomic.so.1
+libpcre2-16.so.0
+
 
 define Package/$(PKG_NAME)-core
   $(call Package/$(PKG_NAME)/Default)
   TITLE+=core
+  DEPENDS+=+libatomic +libpcre2-16
 endef
 
 define Package/$(PKG_NAME)-concurrent
