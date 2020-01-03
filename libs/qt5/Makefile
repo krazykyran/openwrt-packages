@@ -40,11 +40,6 @@ define Package/$(PKG_NAME)/Default
   DEPENDS:=+librt +zlib +libstdcpp +libpthread @!LINUX_2_6
 endef
 
-
-libatomic.so.1
-libpcre2-16.so.0
-
-
 define Package/$(PKG_NAME)-core
   $(call Package/$(PKG_NAME)/Default)
   TITLE+=core
