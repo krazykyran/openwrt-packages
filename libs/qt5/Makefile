@@ -119,7 +119,7 @@ define Build/Configure
 			-extprefix $(TOOLCHAIN_DIR) \
 			-sysroot $(TOOLCHAIN_DIR) \
 			-plugindir /usr/lib/Qt/plugins \
-			-xplatform linux-openwrt-g++
+			-xplatform linux-openwrt-g++ \
 			-opensource \
 			-confirm-license \
 			-no-iconv \
