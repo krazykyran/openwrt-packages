@@ -44,22 +44,27 @@ define Build/Prepare
 	$(CP) ./src/* $(PKG_BUILD_DIR)/
 endef
 
-MAKE_OPTS:= \
-	ARCH="$(LINUX_KARCH)" \
-	CROSS_COMPILE="$(TARGET_CROSS)" \
-	SUBDIRS="$(PKG_BUILD_DIR)"
-
 define Build/Compile
 	$(MAKE) -C "$(LINUX_DIR)" \
-		$(MAKE_OPTS) \
-		CONFIG_WLAN_VENDOR_RSI=y \
-		CONFIG_RSI_DEBUGFS=y \
-		CONFIG_RSI_COEX=y \
+		ARCH="$(LINUX_KARCH)" \
+		CROSS_COMPILE="$(TARGET_CROSS)" \
+		SUBDIRS="$(PKG_BUILD_DIR)" \
 		CONFIG_HW_SCAN_OFFLOAD=y \
+		CONFIG_RSI_BT_ALONE=y \
+		CONFIG_RSI_COEX=y \
+		CONFIG_RSI_MULTI_MODE=y \	
 		CONFIG_RSI_91X=m \
 		CONFIG_RSI_SDIO=m \
 		CONFIG_RSI_USB=m \
 		modules
+endef
+
+define Build/Clean
+	$(MAKE) -C "$(LINUX_DIR)" \
+		ARCH="$(LINUX_KARCH)" \
+		CROSS_COMPILE="$(TARGET_CROSS)" \
+		SUBDIRS="$(PKG_BUILD_DIR)" \
+		clean
 endef
 
 $(eval $(call KernelPackage,rsi91x-edge))
