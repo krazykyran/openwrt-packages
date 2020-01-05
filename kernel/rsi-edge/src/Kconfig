@@ -53,7 +53,7 @@ config RSI_BT_ALONE
 config RSI_COEX
 	bool "Redpine Signals Wi-Fi BT Coex support"
 	depends on RSI_91X
-	default y
+	default n
 	---help---
 	  This option enables the Wi-Fi BT coex support in rsi drivers.
 	  Select Y, if you have to use this feature.
