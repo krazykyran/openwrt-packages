@@ -36,8 +36,8 @@ rsi_91x-y									+= rsi_91x_hal.o
 rsi_91x-y									+= rsi_91x_ps.o
 rsi_91x-$(CONFIG_RSI_DEBUGFS)				+= rsi_91x_debugfs.o
 rsi_91x-$(CONFIG_RSI_BT_ALONE)				+= rsi_91x_hci.o
-rsi_91x-$(CONFIG_RSI_COEX)					+= rsi_91x_hci.o
 rsi_91x-$(CONFIG_RSI_COEX)					+= rsi_91x_coex.o
+rsi_91x-$(CONFIG_RSI_COEX)					+= rsi_91x_hci.o
 rsi_91x-$(CONFIG_RSI_ZIGB)					+= rsi_91x_zigb.o
 rsi_91x-$(CONFIG_RSI_11K)					+= rsi_91x_rrm.o
 	
@@ -56,6 +56,8 @@ ccflags-$(CONFIG_RSI_11K)					+= -DCONFIG_RSI_11K
 ccflags-$(RSI_DEBUG_RRM)					+= -DRSI_DEBUG_RRM
 ccflags-$(CONFIG_RSI_NO_SDIO_MULTIBLOCK)	+= -DCONFIG_RSI_NO_SDIO_MULTIBLOCK
 
+rsi_usb-$(CONFIG_RSI_USB)					+= rsi_91x_usb.o rsi_91x_usb_ops.o
+rsi_sdio-$(CONFIG_RSI_SDIO)					+= rsi_91x_sdio.o rsi_91x_sdio_ops.o
 obj-$(CONFIG_RSI_91X)						+= rsi_91x.o
 obj-$(CONFIG_RSI_SDIO)						+= rsi_sdio.o
 obj-$(CONFIG_RSI_USB)						+= rsi_usb.o
