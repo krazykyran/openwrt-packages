@@ -29,7 +29,7 @@
 #include <linux/tty_flip.h>
 #include <linux/spi/spi.h>
 #include <linux/uaccess.h>
-
+#include <linux/init.h>
 
 #define SC16IS7XX_NAME			"sc16is7xx"
 #define SC16IS7XX_MAX_DEVS		8
@@ -361,6 +361,7 @@ static u8 sc16is7xx_port_read(struct uart_port *port, u8 reg)
 	unsigned int val = 0;
 	const u8 line = sc16is7xx_line(port);
 
+	printk(KERN_INFO "Port read\n");
 	regmap_read(s->regmap, (reg << SC16IS7XX_REG_SHIFT) | line, &val);
 
 	return val;
@@ -371,6 +372,7 @@ static void sc16is7xx_port_write(struct uart_port *port, u8 reg, u8 val)
 	struct sc16is7xx_port *s = dev_get_drvdata(port->dev);
 	const u8 line = sc16is7xx_line(port);
 
+	printk(KERN_INFO "Port write\n");
 	regmap_write(s->regmap, (reg << SC16IS7XX_REG_SHIFT) | line, val);
 }
 
@@ -381,6 +383,7 @@ static void sc16is7xx_fifo_read(struct uart_port *port, unsigned int rxlen)
 	u8 addr = (SC16IS7XX_RHR_REG << SC16IS7XX_REG_SHIFT) | line;
 
 	regcache_cache_bypass(s->regmap, true);
+	printk(KERN_INFO "FIFO read\n");
 	regmap_raw_read(s->regmap, addr, s->buf, rxlen);
 	regcache_cache_bypass(s->regmap, false);
 }
@@ -399,6 +402,7 @@ static void sc16is7xx_fifo_write(struct uart_port *port, u8 to_send)
 		return;
 
 	regcache_cache_bypass(s->regmap, true);
+	printk(KERN_INFO "FIFO write\n");
 	regmap_raw_write(s->regmap, addr, s->buf, to_send);
 	regcache_cache_bypass(s->regmap, false);
 }
@@ -409,6 +413,7 @@ static void sc16is7xx_port_update(struct uart_port *port, u8 reg,
 	struct sc16is7xx_port *s = dev_get_drvdata(port->dev);
 	const u8 line = sc16is7xx_line(port);
 
+	printk(KERN_INFO "Port update\n");
 	regmap_update_bits(s->regmap, (reg << SC16IS7XX_REG_SHIFT) | line,
 			   mask, val);
 }
@@ -495,6 +500,8 @@ static bool sc16is7xx_regmap_precious(struct device *dev, unsigned int reg)
 
 static int sc16is7xx_set_baud(struct uart_port *port, int baud)
 {
+	printk(KERN_INFO "Setting baudrate\n");
+	
 	struct sc16is7xx_port *s = dev_get_drvdata(port->dev);
 	u8 lcr;
 	u8 efr;
@@ -555,6 +562,8 @@ static int sc16is7xx_set_baud(struct uart_port *port, int baud)
 
 	/* Put LCR back to the normal mode */
 	sc16is7xx_port_write(port, SC16IS7XX_LCR_REG, lcr);
+	
+	printk(KERN_INFO "Set baudrate\n");
 
 	return DIV_ROUND_CLOSEST(clk / 16, div);
 }
@@ -562,6 +571,8 @@ static int sc16is7xx_set_baud(struct uart_port *port, int baud)
 static void sc16is7xx_handle_rx(struct uart_port *port, unsigned int rxlen,
 				unsigned int iir)
 {
+	printk(KERN_INFO "Handling rx\n");
+	
 	struct sc16is7xx_port *s = dev_get_drvdata(port->dev);
 	unsigned int lsr = 0, ch, flag, bytes_read, i;
 	bool read_lsr = (iir == SC16IS7XX_IIR_RLSE_SRC) ? true : false;
@@ -635,10 +646,14 @@ static void sc16is7xx_handle_rx(struct uart_port *port, unsigned int rxlen,
 	}
 
 	tty_flip_buffer_push(&port->state->port);
+	
+	printk(KERN_INFO "Handled rx\n");
 }
 
 static void sc16is7xx_handle_tx(struct uart_port *port)
 {
+	printk(KERN_INFO "Handling tx\n");
+	
 	struct sc16is7xx_port *s = dev_get_drvdata(port->dev);
 	struct circ_buf *xmit = &port->state->xmit;
 	unsigned int txlen, to_send, i;
@@ -680,10 +695,14 @@ static void sc16is7xx_handle_tx(struct uart_port *port)
 
 	if (uart_circ_chars_pending(xmit) < WAKEUP_CHARS)
 		uart_write_wakeup(port);
+	
+	printk(KERN_INFO "Handled tx\n");
 }
 
 static bool sc16is7xx_port_irq(struct sc16is7xx_port *s, int portno)
 {
+	printk(KERN_INFO "Port IRQ\n");
+	
 	struct uart_port *port = &s->p[portno].port;
 
 	do {
@@ -714,12 +733,17 @@ static bool sc16is7xx_port_irq(struct sc16is7xx_port *s, int portno)
 			break;
 		}
 	} while (0);
+	
+	printk(KERN_INFO "Port IRQ'd\n");
+	
 	return true;
 }
 
 static void sc16is7xx_ist(struct kthread_work *ws)
 {
 	struct sc16is7xx_port *s = to_sc16is7xx_port(ws, irq_work);
+	
+	printk(KERN_INFO "Port IST\n");
 
 	mutex_lock(&s->efr_lock);
 
@@ -737,6 +761,8 @@ static void sc16is7xx_ist(struct kthread_work *ws)
 	}
 
 	mutex_unlock(&s->efr_lock);
+	
+	printk(KERN_INFO "Port IST'd\n");
 }
 
 static irqreturn_t sc16is7xx_irq(int irq, void *dev_id)
@@ -1394,6 +1420,8 @@ static int sc16is7xx_spi_probe(struct spi_device *spi)
 	unsigned long flags = 0;
 	struct regmap *regmap;
 	int ret;
+	
+	printk(KERN_INFO "SPI probe\n");
 
 	/* Setup SPI bus */
 	spi->bits_per_word	= 8;
@@ -1422,12 +1450,15 @@ static int sc16is7xx_spi_probe(struct spi_device *spi)
 	regcfg.max_register = (0xf << SC16IS7XX_REG_SHIFT) |
 			      (devtype->nr_uart - 1);
 	regmap = devm_regmap_init_spi(spi, &regcfg);
+	
+	printk(KERN_INFO "SPI probed\n");
 
 	return sc16is7xx_probe(&spi->dev, devtype, regmap, spi->irq, flags);
 }
 
 static int sc16is7xx_spi_remove(struct spi_device *spi)
 {
+	printk(KERN_INFO "SPI remove\n");
 	return sc16is7xx_remove(&spi->dev);
 }
 

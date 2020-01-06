@@ -11,8 +11,6 @@ include $(INCLUDE_DIR)/kernel.mk
 PKG_NAME:=serial-sc16is7xx
 PKG_RELEASE:=1
 
-PKG_BUILD_DIR:=$(KERNEL_BUILD_DIR)/$(PKG_NAME)
-
 include $(INCLUDE_DIR)/package.mk
 
 define KernelPackage/$(PKG_NAME)
@@ -29,6 +27,16 @@ define KernelPackage/$(PKG_NAME)/description
 	serial UART chips connected via I2C or SPI.
 endef
 
+EXTRA_KCONFIG:= \
+	CONFIG_SERIAL_CORE=m \
+	CONFIG_SERIAL_SC16IS7XX_CORE=m \
+	CONFIG_SERIAL_SC16IS7XX_I2C=y \
+	CONFIG_SERIAL_SC16IS7XX_SPI=y
+
+EXTRA_CFLAGS:= \
+	$(patsubst CONFIG_%, -DCONFIG_%=1, $(patsubst %=m,%,$(filter %=m,$(EXTRA_KCONFIG)))) \
+	$(patsubst CONFIG_%, -DCONFIG_%=1, $(patsubst %=y,%,$(filter %=y,$(EXTRA_KCONFIG))))
+
 define Build/Prepare
 	rm -rf $(PKG_BUILD_DIR)
 	mkdir -p $(PKG_BUILD_DIR)
@@ -38,13 +46,11 @@ endef
 
 define Build/Compile
 	$(MAKE) -C "$(LINUX_DIR)" \
-		ARCH="$(LINUX_KARCH)" \
 		CROSS_COMPILE="$(TARGET_CROSS)" \
+		ARCH="$(LINUX_KARCH)" \
 		SUBDIRS="$(PKG_BUILD_DIR)" \
-		CONFIG_SERIAL_CORE=m \
-		CONFIG_SERIAL_SC16IS7XX_CORE=m \
-		CONFIG_SERIAL_SC16IS7XX_I2C=y \
-		CONFIG_SERIAL_SC16IS7XX_SPI=y \
+		EXTRA_CFLAGS="$(EXTRA_CFLAGS)" \
+		$(EXTRA_KCONFIG) \
 		modules
 endef
 
