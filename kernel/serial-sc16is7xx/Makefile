@@ -18,7 +18,7 @@ define KernelPackage/$(PKG_NAME)
 	DEPENDS:=+kmod-i2c-core +kmod-regmap
 	TITLE:=NXP SC16IS7xx serial UART bridge SPI/I2C
 	FILES:=$(PKG_BUILD_DIR)/sc16is7xx.ko
-	AUTOLOAD:=$(call AutoProbe,serial_core sc16is7xx)
+	AUTOLOAD:=$(call AutoProbe,sc16is7xx)
 endef
 
 define KernelPackage/$(PKG_NAME)/description
@@ -27,7 +27,7 @@ define KernelPackage/$(PKG_NAME)/description
 endef
 
 EXTRA_KCONFIG:= \
-	CONFIG_SERIAL_CORE=y \
+	CONFIG_SERIAL_SC16IS7XX=m \
 	CONFIG_SERIAL_SC16IS7XX_CORE=m \
 	CONFIG_SERIAL_SC16IS7XX_I2C=n \
 	CONFIG_SERIAL_SC16IS7XX_SPI=y
