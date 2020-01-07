@@ -17,8 +17,7 @@ define KernelPackage/$(PKG_NAME)
 	SUBMENU:=Other modules
 	DEPENDS:=+kmod-i2c-core +kmod-regmap
 	TITLE:=NXP SC16IS7xx serial UART bridge SPI/I2C
-	FILES:=$(PKG_BUILD_DIR)/serial_core.ko \
-		$(PKG_BUILD_DIR)/sc16is7xx.ko
+	FILES:=$(PKG_BUILD_DIR)/sc16is7xx.ko
 	AUTOLOAD:=$(call AutoProbe,serial_core sc16is7xx)
 endef
 
@@ -28,6 +27,7 @@ define KernelPackage/$(PKG_NAME)/description
 endef
 
 EXTRA_KCONFIG:= \
+	CONFIG_SERIAL_CORE=y \
 	CONFIG_SERIAL_SC16IS7XX_CORE=m \
 	CONFIG_SERIAL_SC16IS7XX_I2C=n \
 	CONFIG_SERIAL_SC16IS7XX_SPI=y
@@ -40,7 +40,6 @@ define Build/Prepare
 	rm -rf $(PKG_BUILD_DIR)
 	mkdir -p $(PKG_BUILD_DIR)
 	$(CP) ./src/* $(PKG_BUILD_DIR)
-	$(CP) $(LINUX_DIR)/drivers/tty/serial/serial_core.c $(PKG_BUILD_DIR)
 endef
 
 define Build/Compile
@@ -51,14 +50,6 @@ define Build/Compile
 		EXTRA_CFLAGS="$(EXTRA_CFLAGS)" \
 		$(EXTRA_KCONFIG) \
 		modules
-endef
-
-define Build/Clean
-	$(MAKE) -C "$(LINUX_DIR)" \
-		ARCH="$(LINUX_KARCH)" \
-		CROSS_COMPILE="$(TARGET_CROSS)" \
-		SUBDIRS="$(PKG_BUILD_DIR)" \
-		clean
 endef
 
 $(eval $(call KernelPackage,$(PKG_NAME)))
