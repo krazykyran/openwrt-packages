@@ -1003,8 +1003,6 @@ static int sc16is7xx_config_rs485(struct uart_port *port,
 	return 0;
 }
 
-static int sc16is7xx_sreset_done = 0;
-
 static int sc16is7xx_startup(struct uart_port *port)
 {
 	struct sc16is7xx_port *s = dev_get_drvdata(port->dev);
@@ -1013,14 +1011,10 @@ static int sc16is7xx_startup(struct uart_port *port)
 	sc16is7xx_power(port, 1);
 
 	/* K.McGlasson - added Software Reset on startup */
-	if (sc16is7xx_sreset_done == 0)
-	{
-		dev_info(port->dev, "performing software reset on first use.");
-		sc16is7xx_port_write(port, SC16IS7XX_IOCONTROL_REG,
-				SC16IS7XX_IOCONTROL_SRESET_BIT);
-		sc16is7xx_sreset_done = 1;
-		udelay(5);
-	}
+	dev_info(port->dev, "performing software reset on first use.");
+	sc16is7xx_port_write(port, SC16IS7XX_IOCONTROL_REG,
+			SC16IS7XX_IOCONTROL_SRESET_BIT);
+	udelay(5);
 
 	/* Reset FIFOs*/
 	val = SC16IS7XX_FCR_RXRESET_BIT | SC16IS7XX_FCR_TXRESET_BIT;
