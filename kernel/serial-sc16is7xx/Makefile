@@ -19,7 +19,7 @@ define KernelPackage/$(PKG_NAME)
 	TITLE:=NXP SC16IS7xx serial UART bridge SPI/I2C
 	FILES:=$(LINUX_DIR)/drivers/tty/serial/sc16is7xx.ko \
 		$(LINUX_DIR)/drivers/tty/serial/serial_core.ko
-	AUTOLOAD:=$(call AutoProbe,sc16is7xx)
+	AUTOLOAD:=$(call AutoProbe,serial_core sc16is7xx)
 endef
 
 define KernelPackage/$(PKG_NAME)/description
