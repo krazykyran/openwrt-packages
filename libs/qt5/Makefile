@@ -166,7 +166,7 @@ define Build/Compile
 	STAGING_DIR="$(STAGING_DIR)" \
 	STAGING_DIR_HOST="$(STAGING_DIR)/../host" \
 	PKG_CONFIG_SYSROOT="$(STAGING_DIR)" \
-	$(MAKE) -j4 -C $(PKG_BUILD_DIR)
+	$(MAKE) -j8 -C $(PKG_BUILD_DIR)
 endef
 
 define Build/InstallDev
