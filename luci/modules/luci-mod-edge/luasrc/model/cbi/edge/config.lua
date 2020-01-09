@@ -30,28 +30,28 @@ general_verbose.default = "0"
 general_verbose.optional = false
 general_verbose.rmempty = false
 
-general_lap = scanning:option(Flag, "enable_lap", "Enable LAP Scanning")
+general_lap = general:option(Flag, "enable_lap", "Enable LAP Scanning")
 general_lap.default = "true"
 general_lap.enabled = "true"
 general_lap.disabled = "false"
 general_lap.optional = false
 general_lap.rmempty = false
 
-general_hci = scanning:option(Flag, "enable_hci", "Enable HCI Scanning")
+general_hci = general:option(Flag, "enable_hci", "Enable HCI Scanning")
 general_hci.default = "true"
 general_hci.enabled = "true"
 general_hci.disabled = "false"
 general_hci.optional = false
 general_hci.rmempty = false
 
-general_hci_le = scanning:option(Flag, "enable_hci_le", "Enable HCI LE Scanning")
+general_hci_le = general:option(Flag, "enable_hci_le", "Enable HCI LE Scanning")
 general_hci_le.default = "true"
 general_hci_le.enabled = "true"
 general_hci_le.disabled = "false"
 general_hci_le.optional = false
 general_hci_le.rmempty = false
 
-general_wifi = scanning:option(Flag, "enable_wifi", "Enable WiFi Scanning")
+general_wifi = general:option(Flag, "enable_wifi", "Enable WiFi Scanning")
 general_wifi.default = "true"
 general_wifi.enabled = "true"
 general_wifi.disabled = "false"
