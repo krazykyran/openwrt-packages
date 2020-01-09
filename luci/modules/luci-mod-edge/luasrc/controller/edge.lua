@@ -3,10 +3,7 @@
 
 module("luci.controller.edge", package.seeall)
 
-function index()
-	if not nixio.fs.access("/etc/config/edge") then
-		return
-	end
-	
-	entry({"admin", "edge", "config"}, cbi("edge/config"), _("Configuration")).dependent=true
+function index()	
+	entry({"admin", "edge"}, firstchild(), "EDGE", 60).dependent=false
+	entry({"admin", "edge", "config"}, cbi("edge/config"), "Configuration")
 end
