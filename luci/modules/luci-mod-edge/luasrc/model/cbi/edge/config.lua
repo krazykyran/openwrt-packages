@@ -1,7 +1,8 @@
 -- Copyright 2020 Simon Crawley <simon.crawley@gotosage.com>
 -- Licensed to the public under the Apache License 2.0.
 
-m = Map("edge", translate("EDGE Configuration"), translate("Customize device-specific parameters used by the SAGE EDGE binaries"))
+local m = Map("edge", translate("EDGE Configuration"), translate("Customize device-specific parameters used by the SAGE EDGE binaries"))
+m.tabbed = true
 
 general = m:section(TypedSection, "general", "General")
 general.addremove = false
@@ -29,37 +30,33 @@ general_verbose.default = "0"
 general_verbose.optional = false
 general_verbose.rmempty = false
 
-scanning = m:section(TypedSection, "scanning", "Scanning")
-scanning.addremove = false
-scanning.anonymous = true
+general_lap = scanning:option(Flag, "enable_lap", "Enable LAP Scanning")
+general_lap.default = "true"
+general_lap.enabled = "true"
+general_lap.disabled = "false"
+general_lap.optional = false
+general_lap.rmempty = false
 
-scanning_lap = scanning:option(Flag, "enable_lap", "Enable LAP Scanning")
-scanning_lap.default = "true"
-scanning_lap.enabled = "true"
-scanning_lap.disabled = "false"
-scanning_lap.optional = false
-scanning_lap.rmempty = false
+general_hci = scanning:option(Flag, "enable_hci", "Enable HCI Scanning")
+general_hci.default = "true"
+general_hci.enabled = "true"
+general_hci.disabled = "false"
+general_hci.optional = false
+general_hci.rmempty = false
 
-scanning_hci = scanning:option(Flag, "enable_hci", "Enable HCI Scanning")
-scanning_hci.default = "true"
-scanning_hci.enabled = "true"
-scanning_hci.disabled = "false"
-scanning_hci.optional = false
-scanning_hci.rmempty = false
+general_hci_le = scanning:option(Flag, "enable_hci_le", "Enable HCI LE Scanning")
+general_hci_le.default = "true"
+general_hci_le.enabled = "true"
+general_hci_le.disabled = "false"
+general_hci_le.optional = false
+general_hci_le.rmempty = false
 
-scanning_hci_le = scanning:option(Flag, "enable_hci_le", "Enable HCI LE Scanning")
-scanning_hci_le.default = "true"
-scanning_hci_le.enabled = "true"
-scanning_hci_le.disabled = "false"
-scanning_hci_le.optional = false
-scanning_hci_le.rmempty = false
-
-scanning_wifi = scanning:option(Flag, "enable_wifi", "Enable WiFi Scanning")
-scanning_wifi.default = "true"
-scanning_wifi.enabled = "true"
-scanning_wifi.disabled = "false"
-scanning_wifi.optional = false
-scanning_wifi.rmempty = false
+general_wifi = scanning:option(Flag, "enable_wifi", "Enable WiFi Scanning")
+general_wifi.default = "true"
+general_wifi.enabled = "true"
+general_wifi.disabled = "false"
+general_wifi.optional = false
+general_wifi.rmempty = false
 
 collector = m:section(TypedSection, "collector", "Data Collector")
 collector.addremove = false
