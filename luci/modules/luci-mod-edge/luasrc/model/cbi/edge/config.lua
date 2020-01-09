@@ -122,7 +122,7 @@ addinsight_server_port.size = 6
 addinsight_server_port.optional = false
 addinsight_server_port.rmempty = false
 
-qtfd = m:section(TypedSection, "qtdf", "QLD TMR Data Format"
+qtfd = m:section(TypedSection, "qtdf", "QLD TMR Data Format")
 qtfd.addremove = false
 qtfd.anonymous = true
 
