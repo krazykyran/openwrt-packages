@@ -464,7 +464,6 @@ static const struct sc16is7xx_devtype sc16is762_devtype = {
 
 static bool sc16is7xx_regmap_volatile(struct device *dev, unsigned int reg)
 {
-	return true;
 	switch (reg >> SC16IS7XX_REG_SHIFT) {
 	case SC16IS7XX_RHR_REG:
 	case SC16IS7XX_IIR_REG:
