@@ -69,7 +69,7 @@ collector_enabled.disabled = "false"
 collector_enabled.optional = false
 collector_enabled.rmempty = false
 
-collector_listen_ip = collector:option(Value, "listen_ip", "Listen IP", "IP Address to listen for scan results on")
+collector_listen_ip = collector:option(Value, "listen_ip", "Listen Address", "Address to listen for scan results on")
 collector_listen_ip.default = "127.0.0.1"
 collector_listen_ip.size = 16
 collector_listen_ip.optional = false
@@ -81,7 +81,7 @@ collector_listen_port.size = 6
 collector_listen_port.optional = false
 collector_listen_port.rmempty = false
 
-collector_server_ip = collector:option(Value, "server_ip", "Server IP", "IP Address to transmit scan results to")
+collector_server_ip = collector:option(Value, "server_ip", "Server Address", "Address to transmit scan results to")
 collector_server_ip.default = "127.0.0.1"
 collector_server_ip.size = 16
 collector_server_ip.optional = false
@@ -110,7 +110,7 @@ addinsight_site_id.size = 5
 addinsight_site_id.optional = false
 addinsight_site_id.rmempty = false
 
-addinsight_server_ip = addinsight:option(Value, "server_ip", "Server IP", "IP Address to transmit Addinsight UDP packets to")
+addinsight_server_ip = addinsight:option(Value, "server_ip", "Server Address", "Address to transmit Addinsight UDP packets to")
 addinsight_server_ip.default = "127.0.0.1"
 addinsight_server_ip.size = 16
 addinsight_server_ip.optional = false
@@ -121,5 +121,89 @@ addinsight_server_port.default = "2000"
 addinsight_server_port.size = 6
 addinsight_server_port.optional = false
 addinsight_server_port.rmempty = false
+
+qtfd = m:section(TypedSection, "qtdf", "QLD TMR Data Format"
+qtfd.addremove = false
+qtfd.anonymous = true
+
+qtdf_enabled = qtfd:option(Flag, "enabled", "Enable")
+qtdf_enabled.default = "false"
+qtdf_enabled.enabled = "true"
+qtdf_enabled.disabled = "false"
+qtdf_enabled.optional = false
+qtdf_enabled.rmempty = false
+
+qtdf_log_path = qtdf:option(Value, "log_path", "Log file directory")
+qtdf_log_path.default = "/home/data"
+qtdf_log_path.size = 32
+qtdf_log_path.optional = false
+qtdf_log_path.rmempty = false
+
+qtdf_device_id = qtfd:option(Value, "device_id", "Device ID", "Device ID to report to the specified Kafka server")
+qtdf_device_id.default = "1234"
+qtdf_device_id.size = 5
+qtdf_device_id.optional = false
+qtdf_device_id.rmempty = false
+
+qtdf_device_desc = qtfd:option(Value, "device_desc", "Device Description", "Device description to report to the specified Kafka server")
+qtdf_device_desc.default = "DeviceDescription"
+qtdf_device_desc.size = 32
+qtdf_device_desc.optional = false
+qtdf_device_desc.rmempty = false
+
+qtdf_kafka_server_ip = qtdf:option(Value, "kafka_server_ip", "Kafka Server Address", "Address to transmit Kafka packets to")
+qtdf_kafka_server_ip.default = "172.20.0.2"
+qtdf_kafka_server_ip.size = 16
+qtdf_kafka_server_ip.optional = false
+qtdf_kafka_server_ip.rmempty = false
+
+
+qtdf_kafka_server_port = qtdf:option(Value, "kafka_server_port", "Kafka Server Port", "Port to transmit Kafka packets to")
+qtdf_kafka_server_port.default = "9092"
+qtdf_kafka_server_port.size = 6
+qtdf_kafka_server_port.optional = false
+qtdf_kafka_server_port.rmempty = false
+
+qtdf_kafka_topic = qtdf:option(Value, "kafka_topic", "Kafka Topic", "Kafka Topic to deliver QTDF messages to")
+qtdf_kafka_topic.default = "test_omnia"
+qtdf_kafka_topic.size = 32
+qtdf_kafka_topic.optional = false
+qtdf_kafka_topic.rmempty = false
+
+qtdf_kafka_publish_period = qtdf:option(Value, "kafka_publish_period_ms", "Kafka Publish Period (in ms)", "Time to wait (in ms) between transmitting QTDF frames to the specified Kafka server")
+qtdf_kafka_publish_period.default = "5000"
+qtdf_kafka_publish_period.size = 6
+qtdf_kafka_publish_period.optional = false
+qtdf_kafka_publish_period.rmempty = false
+
+qtdf_flush_period_minutes = qtdf:option(Value, "flush_period_minutes", "Flush period (in minutes)", "Data is logged to file at the specified interval")
+qtdf_flush_period_minutes.default = "60"
+qtdf_flush_period_minutes.size = 6
+qtdf_flush_period_minutes.optional = false
+qtdf_flush_period_minutes.rmempty = false
+
+qtdf_rollover_period_minutes = qtdf:option(Value, "rollover_period_minutes", "Rollover period (in minutes)", "Data is consolidated to a single file at the specified interval and a new log file is created")
+qtdf_rollover_period_minutes.default = "1440"
+qtdf_rollover_period_minutes.size = 6
+qtdf_rollover_period_minutes.optional = false
+qtdf_rollover_period_minutes.rmempty = false
+
+qtdf_gps_datum = qtdf:option(Value, "gps_datum", "GPS Datum", "Geodetic datum to use with the provided latitude and longitude values")
+qtdf_gps_datum.default = "GDA94"
+qtdf_gps_datum.size = 16
+qtdf_gps_datum.optional = false
+qtdf_gps_datum.rmempty = false
+
+qtdf_gps_latitude = qtdf:option(Value, "gps_latitude", "GPS Latitude")
+qtdf_gps_latitude.default = "-27.472684"
+qtdf_gps_latitude.size = 16
+qtdf_gps_latitude.optional = false
+qtdf_gps_latitude.rmempty = false
+
+qtdf_gps_longitude = qtdf:option(Value, "gps_longitude", "GPS Longitude")
+qtdf_gps_longitude.default = "153.028197"
+qtdf_gps_longitude.size = 16
+qtdf_gps_longitude.optional = false
+qtdf_gps_longitude.rmempty = false
 
 return m
