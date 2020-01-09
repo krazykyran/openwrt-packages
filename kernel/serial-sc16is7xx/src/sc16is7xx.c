@@ -29,7 +29,6 @@
 #include <linux/tty_flip.h>
 #include <linux/spi/spi.h>
 #include <linux/uaccess.h>
-#include <linux/init.h>
 
 #define SC16IS7XX_NAME			"sc16is7xx"
 #define SC16IS7XX_MAX_DEVS		8
@@ -465,6 +464,7 @@ static const struct sc16is7xx_devtype sc16is762_devtype = {
 
 static bool sc16is7xx_regmap_volatile(struct device *dev, unsigned int reg)
 {
+	return true;
 	switch (reg >> SC16IS7XX_REG_SHIFT) {
 	case SC16IS7XX_RHR_REG:
 	case SC16IS7XX_IIR_REG:
@@ -638,7 +638,7 @@ static void sc16is7xx_handle_rx(struct uart_port *port, unsigned int rxlen,
 }
 
 static void sc16is7xx_handle_tx(struct uart_port *port)
-{	
+{
 	struct sc16is7xx_port *s = dev_get_drvdata(port->dev);
 	struct circ_buf *xmit = &port->state->xmit;
 	unsigned int txlen, to_send, i;
@@ -714,25 +714,21 @@ static bool sc16is7xx_port_irq(struct sc16is7xx_port *s, int portno)
 			break;
 		}
 	} while (0);
-	
 	return true;
 }
 
 static void sc16is7xx_ist(struct kthread_work *ws)
 {
 	struct sc16is7xx_port *s = to_sc16is7xx_port(ws, irq_work);
-	
+
 	mutex_lock(&s->efr_lock);
 
-	while (1)
-	{
+	while (1) {
 		bool keep_polling = false;
 		int i;
 
 		for (i = 0; i < s->devtype->nr_uart; ++i)
-		{
 			keep_polling |= sc16is7xx_port_irq(s, i);
-		}
 		if (!keep_polling)
 			break;
 	}
@@ -1009,12 +1005,6 @@ static int sc16is7xx_startup(struct uart_port *port)
 	unsigned int val;
 
 	sc16is7xx_power(port, 1);
-
-	/* K.McGlasson - added Software Reset on startup */
-	dev_info(port->dev, "performing software reset on first use.");
-	sc16is7xx_port_write(port, SC16IS7XX_IOCONTROL_REG,
-			SC16IS7XX_IOCONTROL_SRESET_BIT);
-	udelay(5);
 
 	/* Reset FIFOs*/
 	val = SC16IS7XX_FCR_RXRESET_BIT | SC16IS7XX_FCR_TXRESET_BIT;
@@ -1423,7 +1413,6 @@ static int sc16is7xx_spi_probe(struct spi_device *spi)
 
 static int sc16is7xx_spi_remove(struct spi_device *spi)
 {
-	printk(KERN_INFO "SPI remove\n");
 	return sc16is7xx_remove(&spi->dev);
 }
 
@@ -1524,7 +1513,7 @@ static int __init sc16is7xx_init(void)
 	ret = i2c_add_driver(&sc16is7xx_i2c_uart_driver);
 	if (ret < 0) {
 		pr_err("failed to init sc16is7xx i2c --> %d\n", ret);
-		return ret;
+		goto err_i2c;
 	}
 #endif
 
@@ -1532,9 +1521,17 @@ static int __init sc16is7xx_init(void)
 	ret = spi_register_driver(&sc16is7xx_spi_uart_driver);
 	if (ret < 0) {
 		pr_err("failed to init sc16is7xx spi --> %d\n", ret);
-		return ret;
+		goto err_spi;
 	}
 #endif
+	return ret;
+
+err_spi:
+#ifdef CONFIG_SERIAL_SC16IS7XX_I2C
+	i2c_del_driver(&sc16is7xx_i2c_uart_driver);
+#endif
+err_i2c:
+	uart_unregister_driver(&sc16is7xx_uart);
 	return ret;
 }
 module_init(sc16is7xx_init);

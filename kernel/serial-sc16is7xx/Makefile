@@ -15,7 +15,7 @@ include $(INCLUDE_DIR)/package.mk
 
 define KernelPackage/$(PKG_NAME)
 	SUBMENU:=Other modules
-	DEPENDS:=+kmod-i2c-core +kmod-regmap
+	DEPENDS:=+kmod-regmap
 	TITLE:=NXP SC16IS7xx serial UART bridge SPI/I2C
 	FILES:=$(PKG_BUILD_DIR)/sc16is7xx.ko
 	AUTOLOAD:=$(call AutoProbe,sc16is7xx)
