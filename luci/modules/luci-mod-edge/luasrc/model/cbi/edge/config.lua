@@ -122,11 +122,11 @@ addinsight_server_port.size = 6
 addinsight_server_port.optional = false
 addinsight_server_port.rmempty = false
 
-qtfd = m:section(TypedSection, "qtdf", "QLD TMR Data Format")
-qtfd.addremove = false
-qtfd.anonymous = true
+qtdf = m:section(TypedSection, "qtdf", "QLD TMR Data Format")
+qtdf.addremove = false
+qtdf.anonymous = true
 
-qtdf_enabled = qtfd:option(Flag, "enabled", "Enable")
+qtdf_enabled = qtdf:option(Flag, "enabled", "Enable")
 qtdf_enabled.default = "false"
 qtdf_enabled.enabled = "true"
 qtdf_enabled.disabled = "false"
@@ -139,13 +139,13 @@ qtdf_log_path.size = 32
 qtdf_log_path.optional = false
 qtdf_log_path.rmempty = false
 
-qtdf_device_id = qtfd:option(Value, "device_id", "Device ID", "Device ID to report to the specified Kafka server")
+qtdf_device_id = qtdf:option(Value, "device_id", "Device ID", "Device ID to report to the specified Kafka server")
 qtdf_device_id.default = "1234"
 qtdf_device_id.size = 5
 qtdf_device_id.optional = false
 qtdf_device_id.rmempty = false
 
-qtdf_device_desc = qtfd:option(Value, "device_desc", "Device Description", "Device description to report to the specified Kafka server")
+qtdf_device_desc = qtdf:option(Value, "device_desc", "Device Description", "Device description to report to the specified Kafka server")
 qtdf_device_desc.default = "DeviceDescription"
 qtdf_device_desc.size = 32
 qtdf_device_desc.optional = false
