@@ -1002,6 +1002,10 @@ static int sc16is7xx_startup(struct uart_port *port)
 	unsigned int val;
 
 	sc16is7xx_power(port, 1);
+	
+	/* Perform software reset */
+	sc16is7xx_port_write(port, SC16IS7XX_IOCONTROL_SRESET_BIT);
+	udelay(5);
 
 	/* Reset FIFOs*/
 	val = SC16IS7XX_FCR_RXRESET_BIT | SC16IS7XX_FCR_TXRESET_BIT;
