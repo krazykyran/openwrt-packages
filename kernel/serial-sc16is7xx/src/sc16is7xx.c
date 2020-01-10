@@ -496,7 +496,6 @@ static int sc16is7xx_set_baud(struct uart_port *port, int baud)
 {
 	struct sc16is7xx_port *s = dev_get_drvdata(port->dev);
 	u8 lcr;
-	u8 efr;
 	u8 prescaler = 0;
 	unsigned long clk = port->uartclk, div = clk / 16 / baud;
 
@@ -528,9 +527,8 @@ static int sc16is7xx_set_baud(struct uart_port *port, int baud)
 
 	/* Enable enhanced features */
 	regcache_cache_bypass(s->regmap, true);
-	efr = sc16is7xx_port_read(port, SC16IS7XX_EFR_REG);
 	sc16is7xx_port_write(port, SC16IS7XX_EFR_REG,
-			     efr | SC16IS7XX_EFR_ENABLE_BIT);
+			     SC16IS7XX_EFR_ENABLE_BIT);
 	regcache_cache_bypass(s->regmap, false);
 
 	/* Put LCR back to the normal mode */
@@ -1185,7 +1183,8 @@ static int sc16is7xx_probe(struct device *dev,
 			   struct regmap *regmap, int irq, unsigned long flags)
 {
 	struct sched_param sched_param = { .sched_priority = MAX_RT_PRIO / 2 };
-	unsigned long freq, *pfreq = dev_get_platdata(dev);
+	unsigned long freq = 0, *pfreq = dev_get_platdata(dev);
+	
 	int i, ret;
 	struct sc16is7xx_port *s;
 
@@ -1525,11 +1524,13 @@ static int __init sc16is7xx_init(void)
 #endif
 	return ret;
 
+#ifdef CONFIG_SERIAL_SC16IS7XX_SPI
 err_spi:
+#endif
 #ifdef CONFIG_SERIAL_SC16IS7XX_I2C
 	i2c_del_driver(&sc16is7xx_i2c_uart_driver);
-#endif
 err_i2c:
+#endif
 	uart_unregister_driver(&sc16is7xx_uart);
 	return ret;
 }
