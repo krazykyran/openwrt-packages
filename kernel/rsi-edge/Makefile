@@ -38,6 +38,19 @@ define KernelPackage/rsi91x-sdio-edge
 	AUTOLOAD:=$(call AutoProbe,rsi_sdio)
 endef
 
+EXTRA_KCONFIG:= \
+	CONFIG_RSI_91X=m \
+	CONFIG_RSI_USB=m \
+	CONFIG_RSI_SDIO=m \
+	CONFIG_RSI_DEBUGFS=y \
+	CONFIG_RSI_COEX=y \
+	CONFIG_RSI_MULTI_MODE=y \
+	CONFIG_HW_SCAN_OFFLOAD=y
+
+EXTRA_CFLAGS:= \
+	$(patsubst CONFIG_%, -DCONFIG_%=1, $(patsubst %=m,%,$(filter %=m,$(EXTRA_KCONFIG)))) \
+	$(patsubst CONFIG_%, -DCONFIG_%=1, $(patsubst %=y,%,$(filter %=y,$(EXTRA_KCONFIG))))
+
 define Build/Prepare
 	rm -rf $(PKG_BUILD_DIR)
 	mkdir -p $(PKG_BUILD_DIR)
@@ -46,24 +59,12 @@ endef
 
 define Build/Compile
 	$(MAKE) -C "$(LINUX_DIR)" \
-		ARCH="$(LINUX_KARCH)" \
 		CROSS_COMPILE="$(TARGET_CROSS)" \
+		ARCH="$(LINUX_KARCH)" \
 		SUBDIRS="$(PKG_BUILD_DIR)" \
-		CONFIG_HW_SCAN_OFFLOAD=y \
-		CONFIG_RSI_COEX=y \
-		CONFIG_RSI_MULTI_MODE=y \
-		CONFIG_RSI_91X=m \
-		CONFIG_RSI_SDIO=m \
-		CONFIG_RSI_USB=m \
+		EXTRA_CFLAGS="$(EXTRA_CFLAGS)" \
+		$(EXTRA_KCONFIG) \
 		modules
-endef
-
-define Build/Clean
-	$(MAKE) -C "$(LINUX_DIR)" \
-		ARCH="$(LINUX_KARCH)" \
-		CROSS_COMPILE="$(TARGET_CROSS)" \
-		SUBDIRS="$(PKG_BUILD_DIR)" \
-		clean
 endef
 
 $(eval $(call KernelPackage,rsi91x-edge))
