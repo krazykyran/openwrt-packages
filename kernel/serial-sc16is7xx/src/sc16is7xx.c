@@ -496,6 +496,7 @@ static int sc16is7xx_set_baud(struct uart_port *port, int baud)
 {
 	struct sc16is7xx_port *s = dev_get_drvdata(port->dev);
 	u8 lcr;
+	u8 efr = 0;
 	u8 prescaler = 0;
 	unsigned long clk = port->uartclk, div = clk / 16 / baud;
 
@@ -527,8 +528,9 @@ static int sc16is7xx_set_baud(struct uart_port *port, int baud)
 
 	/* Enable enhanced features */
 	regcache_cache_bypass(s->regmap, true);
+	/* efr = sc16is7xx_port_read(port, SC16IS7XX_EFR_REG); */
 	sc16is7xx_port_write(port, SC16IS7XX_EFR_REG,
-			     SC16IS7XX_EFR_ENABLE_BIT);
+			     efr | SC16IS7XX_EFR_ENABLE_BIT);
 	regcache_cache_bypass(s->regmap, false);
 
 	/* Put LCR back to the normal mode */
@@ -700,8 +702,8 @@ static bool sc16is7xx_port_irq(struct sc16is7xx_port *s, int portno)
 			rxlen = sc16is7xx_port_read(port, SC16IS7XX_RXLVL_REG);
 			if (rxlen)
 				sc16is7xx_handle_rx(port, rxlen, iir);
-			else
-				return false;
+/*			else
+				return false; */
 			break;
 		case SC16IS7XX_IIR_THRI_SRC:
 			sc16is7xx_handle_tx(port);
@@ -1004,11 +1006,12 @@ static int sc16is7xx_startup(struct uart_port *port)
 	unsigned int val;
 
 	sc16is7xx_power(port, 1);
-	
-	/* Perform software reset */
+
+	/* K.McGlasson - added Software Reset on startup
+	dev_info(port->dev, "performing software reset on first use.");
 	sc16is7xx_port_write(port, SC16IS7XX_IOCONTROL_REG,
-			     SC16IS7XX_IOCONTROL_SRESET_BIT);
-	udelay(5);
+			SC16IS7XX_IOCONTROL_SRESET_BIT);
+	udelay(5); */
 
 	/* Reset FIFOs*/
 	val = SC16IS7XX_FCR_RXRESET_BIT | SC16IS7XX_FCR_TXRESET_BIT;
@@ -1191,7 +1194,7 @@ static int sc16is7xx_probe(struct device *dev,
 {
 	struct sched_param sched_param = { .sched_priority = MAX_RT_PRIO / 2 };
 	unsigned long freq = 0, *pfreq = dev_get_platdata(dev);
-	
+
 	int i, ret;
 	struct sc16is7xx_port *s;
 
