@@ -23,7 +23,7 @@ define Package/$(PKG_NAME)
   CATEGORY:=Development
   TITLE:=$(PKG_NAME)
   MAINTAINER:=Simon Crawley <simon.crawley@gotosage.com>
-  DEPENDS:=+linux +libncurses-dev +make +gcc +pkg-config +ldconfig
+  DEPENDS:=+libncurses-dev +make +gcc +pkg-config +ldconfig
 endef
 
 define Build/Compile
