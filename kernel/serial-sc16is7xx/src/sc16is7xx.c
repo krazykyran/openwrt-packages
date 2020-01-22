@@ -30,7 +30,6 @@
 #include <linux/spi/spi.h>
 #include <linux/uaccess.h>
 
-
 #define SC16IS7XX_NAME			"sc16is7xx"
 #define SC16IS7XX_MAX_DEVS		8
 
@@ -497,7 +496,7 @@ static int sc16is7xx_set_baud(struct uart_port *port, int baud)
 {
 	struct sc16is7xx_port *s = dev_get_drvdata(port->dev);
 	u8 lcr;
-	u8 efr;
+	u8 efr = 0;
 	u8 prescaler = 0;
 	unsigned long clk = port->uartclk, div = clk / 16 / baud;
 
@@ -529,7 +528,7 @@ static int sc16is7xx_set_baud(struct uart_port *port, int baud)
 
 	/* Enable enhanced features */
 	regcache_cache_bypass(s->regmap, true);
-	efr = sc16is7xx_port_read(port, SC16IS7XX_EFR_REG);
+	/* efr = sc16is7xx_port_read(port, SC16IS7XX_EFR_REG); */
 	sc16is7xx_port_write(port, SC16IS7XX_EFR_REG,
 			     efr | SC16IS7XX_EFR_ENABLE_BIT);
 	regcache_cache_bypass(s->regmap, false);
@@ -703,6 +702,8 @@ static bool sc16is7xx_port_irq(struct sc16is7xx_port *s, int portno)
 			rxlen = sc16is7xx_port_read(port, SC16IS7XX_RXLVL_REG);
 			if (rxlen)
 				sc16is7xx_handle_rx(port, rxlen, iir);
+/*			else
+				return false; */
 			break;
 		case SC16IS7XX_IIR_THRI_SRC:
 			sc16is7xx_handle_tx(port);
@@ -723,15 +724,12 @@ static void sc16is7xx_ist(struct kthread_work *ws)
 
 	mutex_lock(&s->efr_lock);
 
-	while (1)
-	{
+	while (1) {
 		bool keep_polling = false;
 		int i;
 
 		for (i = 0; i < s->devtype->nr_uart; ++i)
-		{
 			keep_polling |= sc16is7xx_port_irq(s, i);
-		}
 		if (!keep_polling)
 			break;
 	}
@@ -1002,8 +1000,6 @@ static int sc16is7xx_config_rs485(struct uart_port *port,
 	return 0;
 }
 
-static int sc16is7xx_sreset_done = 0;
-
 static int sc16is7xx_startup(struct uart_port *port)
 {
 	struct sc16is7xx_port *s = dev_get_drvdata(port->dev);
@@ -1011,15 +1007,11 @@ static int sc16is7xx_startup(struct uart_port *port)
 
 	sc16is7xx_power(port, 1);
 
-	/* K.McGlasson - added Software Reset on startup */
-	if (sc16is7xx_sreset_done == 0)
-	{
-		dev_info(port->dev, "performing software reset on first use.");
-		sc16is7xx_port_write(port, SC16IS7XX_IOCONTROL_REG,
-				SC16IS7XX_IOCONTROL_SRESET_BIT);
-		sc16is7xx_sreset_done = 1;
-		udelay(5);
-	}
+	/* K.McGlasson - added Software Reset on startup
+	dev_info(port->dev, "performing software reset on first use.");
+	sc16is7xx_port_write(port, SC16IS7XX_IOCONTROL_REG,
+			SC16IS7XX_IOCONTROL_SRESET_BIT);
+	udelay(5); */
 
 	/* Reset FIFOs*/
 	val = SC16IS7XX_FCR_RXRESET_BIT | SC16IS7XX_FCR_TXRESET_BIT;
@@ -1201,7 +1193,8 @@ static int sc16is7xx_probe(struct device *dev,
 			   struct regmap *regmap, int irq, unsigned long flags)
 {
 	struct sched_param sched_param = { .sched_priority = MAX_RT_PRIO / 2 };
-	unsigned long freq, *pfreq = dev_get_platdata(dev);
+	unsigned long freq = 0, *pfreq = dev_get_platdata(dev);
+
 	int i, ret;
 	struct sc16is7xx_port *s;
 
@@ -1528,7 +1521,7 @@ static int __init sc16is7xx_init(void)
 	ret = i2c_add_driver(&sc16is7xx_i2c_uart_driver);
 	if (ret < 0) {
 		pr_err("failed to init sc16is7xx i2c --> %d\n", ret);
-		return ret;
+		goto err_i2c;
 	}
 #endif
 
@@ -1536,9 +1529,19 @@ static int __init sc16is7xx_init(void)
 	ret = spi_register_driver(&sc16is7xx_spi_uart_driver);
 	if (ret < 0) {
 		pr_err("failed to init sc16is7xx spi --> %d\n", ret);
-		return ret;
+		goto err_spi;
 	}
 #endif
+	return ret;
+
+#ifdef CONFIG_SERIAL_SC16IS7XX_SPI
+err_spi:
+#endif
+#ifdef CONFIG_SERIAL_SC16IS7XX_I2C
+	i2c_del_driver(&sc16is7xx_i2c_uart_driver);
+err_i2c:
+#endif
+	uart_unregister_driver(&sc16is7xx_uart);
 	return ret;
 }
 module_init(sc16is7xx_init);
