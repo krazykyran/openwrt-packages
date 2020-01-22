@@ -8,8 +8,7 @@
 include $(TOPDIR)/rules.mk
 include $(INCLUDE_DIR)/kernel.mk
 
-PKG_NAME:=kernel-source
-PKG_VERSION:=$(LINUX_VERSION)
+PKG_NAME:=kernel-source-$(LINUX_VERSION)
 PKG_RELEASE:=1
 
 include $(INCLUDE_DIR)/package.mk
@@ -24,16 +23,16 @@ define Package/$(PKG_NAME)
   CATEGORY:=Development
   TITLE:=$(PKG_NAME)
   MAINTAINER:=Simon Crawley <simon.crawley@gotosage.com>
-  DEPENDS:=kernel
+  DEPENDS:=+kernel +libncurses-dev +make +gcc +pkg-config +ldconfig
 endef
 
 define Build/Compile
-
+	
 endef
 
 define Package/$(PKG_NAME)/install
 	$(INSTALL_DIR) $(1)/lib/modules/$(LINUX_VERSION)/build
-	$(INSTALL_DATA) $(BUILD_DIR_TOOLCHAIN)/linux/* $(1)/lib/modules/$(LINUX_VERSION)/build
+	$(INSTALL_DATA) $(LINUX_DIR)/* $(1)/lib/modules/$(LINUX_VERSION)/build
 endef
 
 $(eval $(call BuildPackage,$(PKG_NAME)))
