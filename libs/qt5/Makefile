@@ -1,7 +1,6 @@
 #
 # Copyright (C) 2013 Riccardo Ferrazzo <f.riccardo87@gmail.com>
 # Copyright (C) 2017 Paweł Knioła <pawel.kn@gmail.com>
-# Copyright (C) 2019 Simon Crawley <simon.crawley@gotosage.com>
 #
 # This is free software, licensed under the GNU General Public License v2.
 # See /LICENSE for more information.
@@ -9,9 +8,9 @@
 
 include $(TOPDIR)/rules.mk
 
+PKG_NAME:=qt5
 PKG_VERSION:=5.9
 PKG_RELEASE:=5
-PKG_NAME:=qt5
 PKG_MD5SUM:=0e6eaa2d118f9854345c2debb12e8536
 
 PKG_SOURCE:=qt-everywhere-opensource-src-$(PKG_VERSION).$(PKG_RELEASE).tar.xz
@@ -39,12 +38,13 @@ define Package/$(PKG_NAME)/Default
   SUBMENU:=Qt5
   TITLE:=qt5
   URL:=http://qt-project.org
-  DEPENDS:=+librt +zlib +libstdcpp +libpcre16 +libpcre2-16 +libpthread @!LINUX_2_6
+  DEPENDS:=+librt +zlib +libstdcpp +libpthread @!LINUX_2_6
 endef
 
 define Package/$(PKG_NAME)-core
   $(call Package/$(PKG_NAME)/Default)
   TITLE+=core
+  DEPENDS+=+libatomic +libpcre2-16
 endef
 
 define Package/$(PKG_NAME)-concurrent
@@ -167,7 +167,7 @@ define Build/Compile
 	STAGING_DIR="$(STAGING_DIR)" \
 	STAGING_DIR_HOST="$(STAGING_DIR)/../host" \
 	PKG_CONFIG_SYSROOT="$(STAGING_DIR)" \
-	$(MAKE) -j4 -C $(PKG_BUILD_DIR)
+	$(MAKE) -j8 -C $(PKG_BUILD_DIR)
 endef
 
 define Build/InstallDev
