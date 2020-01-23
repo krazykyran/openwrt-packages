@@ -139,6 +139,7 @@ define Build/Configure
 			-qt-zlib \
 			-qt-freetype \
 			-make libs \
+			-make tools \
 			-nomake examples \
 			-nomake tests \
 			-skip qtdeclarative \
