@@ -18,7 +18,7 @@ PKG_SOURCE_URL:=http://download.qt.io/archive/qt/$(PKG_VERSION)/$(PKG_VERSION).$
 PKG_BUILD_DIR=$(BUILD_DIR)/qt-everywhere-opensource-src-$(PKG_VERSION).$(PKG_RELEASE)
 PKG_BUILD_PARALLEL:=1
 PKG_USE_MIPS16:=0
-#PKG_BUILD_DEPENDS:=libiconv
+PKG_BUILD_DEPENDS:=+libstdcpp
 
 include $(INCLUDE_DIR)/package.mk
 #include $(INCLUDE_DIR)/nls.mk
@@ -99,8 +99,8 @@ define Build/Configure
 	$(INSTALL_DIR) $(PKG_BUILD_DIR)/qtbase/lib/fonts
 	$(INSTALL_DIR) $(PKG_BUILD_DIR)/qtbase/mkspecs/linux-openwrt-g++
 	$(CP) ./files/fonts/* $(PKG_BUILD_DIR)/qtbase/lib/fonts/
-	$(CP) ./files/qplatformdefs.h $(PKG_BUILD_DIR)/qtbase/mkspecs/linux-openwrt-g++/qplatformdefs.h
 	$(CP) ./files/qmake.conf $(PKG_BUILD_DIR)/qtbase/mkspecs/linux-openwrt-g++/qmake.conf
+	$(CP) ./files/qplatformdefs.h $(PKG_BUILD_DIR)/qtbase/mkspecs/linux-openwrt-g++/qplatformdefs.h
 	$(SED) 's@$$$$(TARGET_CROSS)@$(TARGET_CROSS)@g' $(PKG_BUILD_DIR)/qtbase/mkspecs/linux-openwrt-g++/qmake.conf
 	( cd $(PKG_BUILD_DIR) ; \
 		TARGET_CC="$(TARGET_CROSS)gcc" \
@@ -117,39 +117,40 @@ define Build/Configure
 		CXXFLAGS= \
 		LDFLAGS= \
 		./configure \
-			-prefix /usr \
-			-extprefix $(TOOLCHAIN_DIR) \
-			-sysroot $(TOOLCHAIN_DIR) \
-			-plugindir /usr/lib/Qt/plugins \
+			-prefix $(CONFIGURE_PREFIX) \
+			-bindir $(CONFIGURE_PREFIX)/bin \
+			-libdir $(CONFIGURE_PREFIX)/lib \
+			-datadir $(CONFIGURE_PREFIX)/share/Qt \
+			-plugindir $(CONFIGURE_PREFIX)/lib/Qt/plugins \
 			-xplatform linux-openwrt-g++ \
 			-opensource \
 			-confirm-license \
-			-no-iconv \
-			-no-pch \
-			-no-rpath \
+			-no-xcb \
 			-no-strip \
+			-openssl \
+			-no-gui \
+			-no-widgets \
+			-no-nis \
 			-no-cups \
 			-no-dbus \
 			-no-eglfs \
+			-no-directfb \
+			-no-linuxfb \
 			-no-kms \
 			-no-opengl \
-			-no-directfb \
-			-no-xcb \
-			-no-ssl \
-			-qt-zlib \
-			-qt-freetype \
 			-make libs \
-			-make tools \
+			-nomake webkit \
+			-nomake docs \
 			-nomake examples \
+			-nomake demos \
 			-nomake tests \
 			-skip qtdeclarative \
 			-skip qtmultimedia \
 			-skip activeqt \
+			-skip qtwebkit \
+			-skip qtwebkit-examples-and-demos \
+			-skip qtgraphicaleffects \
 			-skip qtdoc \
-			-skip qtconnectivity \
-			-skip wayland \
-			-skip qtscript \
-			-L$(STAGING_DIR)/usr/lib \
 			-v \
 	)
 endef
@@ -169,12 +170,32 @@ define Build/Compile
 	STAGING_DIR_HOST="$(STAGING_DIR)/../host" \
 	PKG_CONFIG_SYSROOT="$(STAGING_DIR)" \
 	$(MAKE) -j8 -C $(PKG_BUILD_DIR)
+	INSTALL_ROOT=$(PKG_INSTALL_DIR) \
+	$(MAKE) -C $(PKG_BUILD_DIR) install
 endef
 
 define Build/InstallDev
-	$(MAKE) -C $(PKG_BUILD_DIR) install
-	$(CP) $(PKG_BUILD_DIR)/qtbase/bin/qmake $(TOOLCHAIN_DIR)/bin/
-	$(CP) $(PKG_BUILD_DIR)/qtbase/bin/qt.conf $(TOOLCHAIN_DIR)/bin/
+	$(INSTALL_DIR) $(2)/bin 
+	$(INSTALL_DIR) $(1)/bin
+	$(INSTALL_DIR) $(1)/usr/mkspecs 
+	$(INSTALL_DIR) $(1)/usr/bin
+	$(INSTALL_DIR) $(1)/usr/include
+	$(INSTALL_DIR) $(1)/usr/lib
+	$(INSTALL_DIR) $(1)/usr/lib/pkgconfig
+	$(INSTALL_DIR) $(1)/usr/lib/cmake
+
+	$(INSTALL_DIR) $(STAGING_DIR)/mk/
+	$(INSTALL_DATA) ./files/qmake.mk $(STAGING_DIR)/mk/
+	
+	$(CP) $(PKG_INSTALL_DIR)/usr/bin/* $(2)/bin/		
+	$(CP) $(PKG_INSTALL_DIR)/usr/bin/* $(2)/bin/
+	$(CP) $(PKG_INSTALL_DIR)/usr/mkspecs/* $(1)/usr/mkspecs/
+	$(CP) $(PKG_INSTALL_DIR)/usr/lib/pkgconfig/* $(1)/usr/lib/pkgconfig/
+	$(CP) $(PKG_INSTALL_DIR)/usr/include/* $(1)/usr/include/		
+	$(CP) $(PKG_INSTALL_DIR)/usr/lib/*.so* $(1)/usr/lib/
+	$(CP) $(PKG_INSTALL_DIR)/usr/lib/*.prl* $(1)/usr/lib/	
+	$(CP) $(PKG_INSTALL_DIR)/usr/lib/*.la* $(1)/usr/lib/
+	$(CP) $(PKG_INSTALL_DIR)/usr/lib/cmake/* $(1)/usr/lib/cmake/
 endef
 
 define Package/$(PKG_NAME)-core/install
