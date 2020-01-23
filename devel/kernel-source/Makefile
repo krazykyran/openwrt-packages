@@ -22,7 +22,7 @@ define Package/$(PKG_NAME)
   SECTION:=devel
   CATEGORY:=Development
   TITLE:=$(PKG_NAME)
-  DEPENDS:=+libncurses-dev +make +gcc +pkg-config +ldconfig
+  DEPENDS:=+libncurses-dev +make +gcc +pkg-config +ldconfig +bc
 endef
 
 define Build/Compile
