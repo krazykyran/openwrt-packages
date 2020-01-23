@@ -4,7 +4,7 @@
 include $(TOPDIR)/rules.mk
 
 LUCI_TITLE:=LuCI EDGE module
-LUCI_DEPENDS:=+luci-base +luci-mod-admin-full
+LUCI_DEPENDS:=+luci-base +luci-mod-admin-full +luci-compat
 
 include $(TOPDIR)/feeds/luci/luci.mk
 
