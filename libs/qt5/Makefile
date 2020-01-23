@@ -18,7 +18,7 @@ PKG_SOURCE_URL:=http://download.qt.io/archive/qt/$(PKG_VERSION)/$(PKG_VERSION).$
 PKG_BUILD_DIR=$(BUILD_DIR)/qt-everywhere-opensource-src-$(PKG_VERSION).$(PKG_RELEASE)
 PKG_BUILD_PARALLEL:=1
 PKG_USE_MIPS16:=0
-PKG_BUILD_DEPENDS:=+libstdcpp
+#PKG_BUILD_DEPENDS:=+libstdcpp
 
 include $(INCLUDE_DIR)/package.mk
 #include $(INCLUDE_DIR)/nls.mk
