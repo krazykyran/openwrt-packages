@@ -18,11 +18,11 @@ PKG_SOURCE_URL:=http://download.qt.io/archive/qt/$(PKG_VERSION)/$(PKG_VERSION).$
 PKG_BUILD_DIR=$(BUILD_DIR)/qt-everywhere-opensource-src-$(PKG_VERSION).$(PKG_RELEASE)
 PKG_BUILD_PARALLEL:=1
 PKG_USE_MIPS16:=0
-#PKG_BUILD_DEPENDS:=+libstdcpp
+PKG_BUILD_DEPENDS:=libiconv
 
 include $(INCLUDE_DIR)/package.mk
-#include $(INCLUDE_DIR)/nls.mk
--include $(if $(DUMP),,./files/qmake.mk)
+include $(INCLUDE_DIR)/nls.mk
+#-include $(if $(DUMP),,./files/qmake.mk)
 
 # not using sstrip here as this fucks up the .so's somehow
 STRIP:=/bin/true
@@ -38,13 +38,12 @@ define Package/$(PKG_NAME)/Default
   SUBMENU:=Qt5
   TITLE:=qt5
   URL:=http://qt-project.org
-  DEPENDS:=+librt +zlib +libstdcpp +libpthread @!LINUX_2_6
+  DEPENDS:=+librt +zlib +libstdcpp +libpcre16 +libpthread +libatomic @!LINUX_2_6
 endef
 
 define Package/$(PKG_NAME)-core
   $(call Package/$(PKG_NAME)/Default)
   TITLE+=core
-  DEPENDS+=+libatomic +libpcre2-16
 endef
 
 define Package/$(PKG_NAME)-concurrent
@@ -113,7 +112,7 @@ define Build/Configure
 		TARGET_LDFLAGS="$(TARGET_LDFLAGS) $(EXTRA_LDFLAGS) -lpthread -lrt" \
 		TARGET_INCDIRS="$(TARGET_INCDIRS)" \
 		TARGET_LIBDIRS="$(TARGET_LIBDIRS) $(STAGING_DIR)/usr/lib/" \
-		CFLAGS= \
+		CFLAGS="$(TARGET_CFLAGS) $(TARGET_CPPFLAGS)" \
 		CXXFLAGS= \
 		LDFLAGS= \
 		./configure \
@@ -125,32 +124,32 @@ define Build/Configure
 			-xplatform linux-openwrt-g++ \
 			-opensource \
 			-confirm-license \
-			-no-xcb \
+			-force-asserts \
+			-no-iconv \
+			-no-pch \
+			-no-rpath \
 			-no-strip \
-			-openssl \
-			-no-gui \
-			-no-widgets \
-			-no-nis \
 			-no-cups \
 			-no-dbus \
 			-no-eglfs \
-			-no-directfb \
-			-no-linuxfb \
 			-no-kms \
 			-no-opengl \
+			-no-directfb \
+			-no-xcb \
+			-no-ssl \
+			-qt-zlib \
+			-qt-freetype \
 			-make libs \
-			-nomake webkit \
-			-nomake docs \
+			-make tools \
 			-nomake examples \
-			-nomake demos \
 			-nomake tests \
 			-skip qtdeclarative \
 			-skip qtmultimedia \
 			-skip activeqt \
-			-skip qtwebkit \
-			-skip qtwebkit-examples-and-demos \
-			-skip qtgraphicaleffects \
 			-skip qtdoc \
+			-skip qtconnectivity \
+			-skip wayland \
+			-skip qtscript \
 			-v \
 	)
 endef
@@ -169,33 +168,16 @@ define Build/Compile
 	STAGING_DIR="$(STAGING_DIR)" \
 	STAGING_DIR_HOST="$(STAGING_DIR)/../host" \
 	PKG_CONFIG_SYSROOT="$(STAGING_DIR)" \
-	$(MAKE) -j8 -C $(PKG_BUILD_DIR)
-	INSTALL_ROOT=$(PKG_INSTALL_DIR) \
-	$(MAKE) -C $(PKG_BUILD_DIR) install
+	TARGET_CPPFLAGS+="-I$(STAGING_DIR)/usr/include/mysql" \
+	TARGET_LDFLAGS+="-L$(STAGING_DIR)/usr/lib/mysql -lmysqlclient" \
+	CFLAGS="$(TARGET_CFLAGS) $(TARGET_CPPFLAGS)" \
+	$(MAKE) -j4 -C $(PKG_BUILD_DIR)
 endef
 
 define Build/InstallDev
-	$(INSTALL_DIR) $(2)/bin 
-	$(INSTALL_DIR) $(1)/bin
-	$(INSTALL_DIR) $(1)/usr/mkspecs 
-	$(INSTALL_DIR) $(1)/usr/bin
-	$(INSTALL_DIR) $(1)/usr/include
-	$(INSTALL_DIR) $(1)/usr/lib
-	$(INSTALL_DIR) $(1)/usr/lib/pkgconfig
-	$(INSTALL_DIR) $(1)/usr/lib/cmake
-
-	$(INSTALL_DIR) $(STAGING_DIR)/mk/
-	$(INSTALL_DATA) ./files/qmake.mk $(STAGING_DIR)/mk/
-	
-	$(CP) $(PKG_INSTALL_DIR)/usr/bin/* $(2)/bin/		
-	$(CP) $(PKG_INSTALL_DIR)/usr/bin/* $(2)/bin/
-	$(CP) $(PKG_INSTALL_DIR)/usr/mkspecs/* $(1)/usr/mkspecs/
-	$(CP) $(PKG_INSTALL_DIR)/usr/lib/pkgconfig/* $(1)/usr/lib/pkgconfig/
-	$(CP) $(PKG_INSTALL_DIR)/usr/include/* $(1)/usr/include/		
-	$(CP) $(PKG_INSTALL_DIR)/usr/lib/*.so* $(1)/usr/lib/
-	$(CP) $(PKG_INSTALL_DIR)/usr/lib/*.prl* $(1)/usr/lib/	
-	$(CP) $(PKG_INSTALL_DIR)/usr/lib/*.la* $(1)/usr/lib/
-	$(CP) $(PKG_INSTALL_DIR)/usr/lib/cmake/* $(1)/usr/lib/cmake/
+	$(MAKE) -C $(PKG_BUILD_DIR) install
+	$(CP) $(PKG_BUILD_DIR)/qtbase/bin/qmake $(TOOLCHAIN_DIR)/bin/
+	$(CP) $(PKG_BUILD_DIR)/qtbase/bin/qt.conf $(TOOLCHAIN_DIR)/bin/
 endef
 
 define Package/$(PKG_NAME)-core/install
