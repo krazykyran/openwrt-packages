@@ -1,7 +1,4 @@
 include $(TOPDIR)/rules.mk
-
-# Be sure to sync version with kernel version
-
 include $(INCLUDE_DIR)/kernel.mk
 
 PKG_NAME:=linux-headers
@@ -14,7 +11,7 @@ define Package/$(PKG_NAME)
   SECTION:=devel
   CATEGORY:=Development
   TITLE:=linux-headers (Development headers)
-  DEPENDS:=+libncursesw +xz +coreutils-whoami +libelf
+  DEPENDS:=+libncurses-dev +xz +coreutils-whoami +libelf
   URL:=http://www.kernel.org/
 endef
 
@@ -37,7 +34,6 @@ define Build/Compile
 endef
 
 # Fails on libtinfo.so.5 dependency. Disable dependency checking
-
 #define CheckDependencies
 #endef
 
