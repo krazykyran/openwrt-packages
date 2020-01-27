@@ -5,20 +5,20 @@ include $(TOPDIR)/rules.mk
 include $(INCLUDE_DIR)/package.mk
 include $(INCLUDE_DIR)/kernel.mk
 
-PKG_NAME:=kernel-headers
+PKG_NAME:=linux-headers
 PKG_VERSION:=$(LINUX_VERSION)-$(LINUX_RELEASE)-$(LINUX_VERMAGIC)
 PKG_RELEASE:=1
 
 define Package/$(PKG_NAME)
   SECTION:=devel
   CATEGORY:=Development
-  TITLE:=kernel-headers (Development headers)
+  TITLE:=linux-headers (Development headers)
   DEPENDS:=+libncursesw +xz +coreutils-whoami +libelf
   URL:=http://www.kernel.org/
 endef
 
 define Package/$(PKG_NAME)/description
-  kernel-headers files for development
+  linux-headers files for development
 endef
 
 # Prepare, Configure, Compile already done by kernel depends
