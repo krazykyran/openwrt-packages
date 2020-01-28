@@ -24,11 +24,6 @@ define Package/$(PKG_NAME)/description
 	as well as GR-Bluetooth/USRP.
 endef
 
-define Build/Prepare
-	mkdir -p $(PKG_BUILD_DIR)
-	$(CP) $(DL_DIR)/* $(PKG_BUILD_DIR)/
-endef
-
 define Package/$(PKG_NAME)/install
 	$(INSTALL_DIR) $(1)/usr/lib
 	$(INSTALL_BIN) $(PKG_BUILD_DIR)/libbtbb.so.* $(1)/usr/lib/
