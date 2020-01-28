@@ -19,7 +19,6 @@ define Package/$(PKG_NAME)/description
   linux-headers files for development
 endef
 
-
 # Prepare, Configure, Compile already done by kernel depends
 define Build/Prepare
 	
@@ -33,30 +32,17 @@ define Build/Compile
 	
 endef
 
-# Fails on libtinfo.so.5 dependency. Disable dependency checking
-#define CheckDependencies
-#endef
-
 # Determine gcc version
 GCC_VERSION:=$(call qstrip,$(CONFIG_GCC_VERSION))
 # Same version as in feeds/packages/devel/gcc/Makefile
 GCC_VER:=7.3.0
 
 define Package/$(PKG_NAME)/install
-	echo INSTALL_DIR: /usr/src/linux-$(LINUX_VERSION)
-	echo SRC_DIR: $(LINUX_DIR)/
-	echo STDARG_LOCATION: /usr/gcc-$(GCC_VER)/lib/gcc/$(REAL_GNU_TARGET_NAME)/$(GCC_VER)/include/stdarg.h
-	echo STDARG_LINK: /usr/src/linux-$(LINUX_VERSION)/include/stdarg.h
 	$(INSTALL_DIR) $(1)/usr/src/linux-$(LINUX_VERSION)
+	$(INSTALL_DIR) $(1)/lib/modules/$(LINUX_VERSION)
 	cp $(LINUX_DIR)/.config $(1)/usr/src/linux-$(LINUX_VERSION)
 	$(CP) $(LINUX_DIR)/* $(1)/usr/src/linux-$(LINUX_VERSION)
+	$(LN) /usr/src/linux-$(LINUX_VERSION) $(1)/lib/modules/$(LINUX_VERSION)/build
 endef
-
-#define Package/$(PKG_NAME)/postinst
-#	#!/bin/sh
-#	# Some compiles fail without this link to stdarg.h
-#	ln -sf /usr/lib/gcc/$(REAL_GNU_TARGET_NAME)/$(GCC_VER)/include/stdarg.h /usr/src/linux-$(LINUX_VERSION)/include/stdarg.h
-#	ln -sf /usr/src/linux-$(LINUX_VERSION) /lib/modules/$(LINUX_VERSION)/build
-#endef
 
 $(eval $(call BuildPackage,$(PKG_NAME)))
