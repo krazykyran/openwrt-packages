@@ -24,5 +24,17 @@ define Package/$(PKG_NAME)/description
 	as well as GR-Bluetooth/USRP.
 endef
 
+define Package/$(PKG_NAME)/install
+	$(INSTALL_DIR) $(1)/usr/bin
+	$(INSTALL_DIR) $(1)/usr/include
+	$(INSTALL_DIR) $(1)/usr/lib
+	$(INSTALL_DIR) $(1)/usr/lib/pkgconfig
+	$(INSTALL_BIN) $(PKG_INSTALL_DIR)/usr/bin/btaptap $(1)/usr/bin/
+	$(INSTALL_DATA) $(PKG_INSTALL_DIR)/usr/include/btbb.h $(1)/usr/include/
+	$(INSTALL_DATA) $(PKG_INSTALL_DIR)/usr/lib/libbtbb.so $(1)/usr/lib/
+	$(INSTALL_DATA) $(PKG_INSTALL_DIR)/usr/lib/libbtbb.so.* $(1)/usr/lib/
+	$(INSTALL_DATA) $(PKG_INSTALL_DIR)/usr/lib/pkgconfig/libbtbb.pc $(1)/usr/lib/pkgconfig/
+endef
+
 $(eval $(call BuildPackage,$(PKG_NAME)))
 
