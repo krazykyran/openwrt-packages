@@ -7,7 +7,7 @@ PKG_BUILD_DIR:=$(BUILD_DIR)/$(PKG_NAME)-$(PKG_VERSION)
 PKG_SOURCE:=$(PKG_VERSION).zip
 PKG_SOURCE_URL:=https://github.com/greatscottgadgets/ubertooth/archive/
 PKG_HASH:=6f15b812c2bbdb7ebbfc4e6317769cf84a6feb3c316bf3fd668f927b4bcf2901
-PKG_BUILD_DEPENDS:=libbtbb-dev libusb-1.0-0-dev libbluetooth-dev
+PKG_BUILD_DEPENDS:=libbtbb libusb-1.0
 
 include $(INCLUDE_DIR)/package.mk
 include $(INCLUDE_DIR)/cmake.mk
