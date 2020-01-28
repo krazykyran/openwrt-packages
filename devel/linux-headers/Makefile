@@ -52,11 +52,11 @@ define Package/$(PKG_NAME)/install
 	$(CP) $(LINUX_DIR)/* $(1)/usr/src/linux-$(LINUX_VERSION)
 endef
 
-define Package/$(PKG_NAME)/postinst
-	#!/bin/sh
-	# Some compiles fail without this link to stdarg.h
-	ln -sf /usr/lib/gcc/$(REAL_GNU_TARGET_NAME)/$(GCC_VER)/include/stdarg.h /usr/src/linux-$(LINUX_VERSION)/include/stdarg.h
-	ln -sf /usr/src/linux-$(LINUX_VERSION) /lib/modules/$(LINUX_VERSION)/build
-endef
+#define Package/$(PKG_NAME)/postinst
+#	#!/bin/sh
+#	# Some compiles fail without this link to stdarg.h
+#	ln -sf /usr/lib/gcc/$(REAL_GNU_TARGET_NAME)/$(GCC_VER)/include/stdarg.h /usr/src/linux-$(LINUX_VERSION)/include/stdarg.h
+#	ln -sf /usr/src/linux-$(LINUX_VERSION) /lib/modules/$(LINUX_VERSION)/build
+#endef
 
 $(eval $(call BuildPackage,$(PKG_NAME)))
