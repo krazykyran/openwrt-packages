@@ -14,7 +14,6 @@ include $(INCLUDE_DIR)/cmake.mk
 define Package/$(PKG_NAME)
 	SECTION:=libs
 	CATEGORY:=Libraries
-	DEPENDS:=+glib2
 	TITLE:=Bluetooth baseband decoding library
 endef
 
