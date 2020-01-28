@@ -44,7 +44,7 @@ return network.registerProtocol('modemmanager', {
 		o = s.taboption('general', form.ListValue, 'device', _('Modem device'));
 		o.rmempty = false;
 		o.load = function(section_id) {
-			return fs.exec("mmcli -m 0 | grep 'device: ' | grep -Eo '/sys/devices/.*' | tr -d \"'\"").then(L.bind(function(devices) {
+			return fs.exec("mmcli -m 0 | grep 'device: ' | grep -Eo '/sys/devices/.*' | tr -d \"'\"'").then(L.bind(function(devices) {
 				for (var i = 0; i < devices.length; i++)
 					this.value(devices[i]);
 				return form.Value.prototype.load.apply(this, [section_id]);
