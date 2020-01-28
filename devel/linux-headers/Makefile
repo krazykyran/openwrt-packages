@@ -11,7 +11,7 @@ define Package/$(PKG_NAME)
   SECTION:=devel
   CATEGORY:=Development
   TITLE:=linux-headers (Development headers)
-  DEPENDS:=+libncurses-dev +make +gcc +pkg-config +ldconfig +bc +coreutils-whoami +libelf
+  DEPENDS:=+libncurses-dev +make +gcc +pkg-config +ldconfig +bc
   URL:=http://www.kernel.org/
 endef
 
