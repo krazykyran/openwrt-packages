@@ -3,17 +3,13 @@
 'require form';
 'require network';
 
-var callFileList = rpc.declare({
+var callFileExec = rpc.declare({
 	object: 'file',
-	method: 'list',
-	params: [ 'path' ],
-	expect: { entries: [] },
-	filter: function(list, params) {
-		var rv = [];
-		for (var i = 0; i < list.length; i++)
-			if (list[i].name.match(/^cdc-wdm/))
-				rv.push(params.path + list[i].name);
-		return rv.sort();
+	method: 'exec',
+	params: [ '/usr/bin/mmcli', '-m 0' ],
+	filter: function(value) {
+		var res = value.substring(value.indexOf("/sys/devices/"));
+		return res.slice(0, res.indexOf(" "));
 	}
 });
 
@@ -53,11 +49,11 @@ return network.registerProtocol('modemmanager', {
 
 	renderFormOptions: function(s) {
 		var dev = this.getL3Device() || this.getDevice(), o;
-
+		
 		o = s.taboption('general', form.ListValue, 'device', _('Modem device'));
 		o.rmempty = false;
 		o.load = function(section_id) {
-			return callFileList('/dev/').then(L.bind(function(devices) {
+			return callFileExec().then(L.bind(function(devices) {
 				for (var i = 0; i < devices.length; i++)
 					this.value(devices[i]);
 				return form.Value.prototype.load.apply(this, [section_id]);
