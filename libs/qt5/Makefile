@@ -128,6 +128,7 @@ define Build/Configure
 			-no-iconv \
 			-no-pch \
 			-no-rpath \
+			-no-qml-debug \
 			-no-strip \
 			-no-cups \
 			-no-dbus \
@@ -138,9 +139,11 @@ define Build/Configure
 			-no-xcb \
 			-no-ssl \
 			-qt-zlib \
+			-qt-pcre \
 			-qt-freetype \
 			-make libs \
 			-nomake examples \
+			-nomake tools \
 			-nomake tests \
 			-skip qtdeclarative \
 			-skip qtmultimedia \
@@ -170,7 +173,7 @@ define Build/Compile
 	TARGET_CPPFLAGS+="-I$(STAGING_DIR)/usr/include/mysql" \
 	TARGET_LDFLAGS+="-L$(STAGING_DIR)/usr/lib/mysql -lmysqlclient" \
 	CFLAGS="$(TARGET_CFLAGS) $(TARGET_CPPFLAGS)" \
-	$(MAKE) -j4 -C $(PKG_BUILD_DIR)
+	$(MAKE) $(PKG_JOBS) -C $(PKG_BUILD_DIR)
 endef
 
 define Build/InstallDev
