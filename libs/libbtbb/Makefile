@@ -41,8 +41,8 @@ define Build/InstallDev
 	$(CP) $(PKG_INSTALL_DIR)/usr/include/* $(1)/usr/include/
 	$(INSTALL_DIR) $(1)/usr/lib
 	$(INSTALL_DATA) $(PKG_INSTALL_DIR)/usr/lib/libbtbb.so.1.0 $(1)/usr/lib/
-	$(LN) ./libbtbb.so.1.0 $(1)/usr/lib/libbtbb.so.1
-	$(LN) ./libbtbb.so.1 $(1)/usr/lib/libbtbb.so
+	$(LN) libbtbb.so.1.0 $(1)/usr/lib/libbtbb.so.1
+	$(LN) libbtbb.so.1 $(1)/usr/lib/libbtbb.so
 	$(INSTALL_DIR) $(1)/usr/lib/pkgconfig
 	$(INSTALL_DATA) $(PKG_INSTALL_DIR)/usr/lib/pkgconfig/libbtbb.pc $(1)/usr/lib/pkgconfig/
 endef
