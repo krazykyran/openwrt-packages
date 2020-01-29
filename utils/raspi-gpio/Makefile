@@ -13,7 +13,7 @@ PKG_SOURCE_VERSION:=4edfde183ff3ac9ed66cdc015ae25e45f3a5502d
 include $(INCLUDE_DIR)/package.mk
 
 # Package definition; instructs on how and where our package will appear in the overall configuration menu ('make menuconfig')
-define Package/raspi-gpio
+define Package/$(PKG_NAME)
   SECTION:=utils
   CATEGORY:=Utilities
   TITLE:=Raspberry Pi GPIO configuration tool
@@ -21,7 +21,7 @@ define Package/raspi-gpio
 endef
 
 # Package description; a more verbose description on what our package does
-define Package/raspi-gpio/description
+define Package/$(PKG_NAME)/description
   The Raspberry Pi GPIO configuration tool.
 endef
 
@@ -37,11 +37,11 @@ define Build/Compile
 endef
 
 # Package install instructions; create a directory inside the package to hold our executable, and then copy the executable we built previously into the folder
-define Package/raspi-gpio/install
+define Package/$(PKG_NAME)/install
 	$(INSTALL_DIR) $(1)/usr/bin
-	$(INSTALL_BIN) $(PKG_BUILD_DIR)/raspi-gpio $(1)/usr/bin
+	$(INSTALL_BIN) $(PKG_BUILD_DIR)/$(PKG_NAME) $(1)/usr/bin
 endef
 
 # This command is always the last, it uses the definitions and variables we give above in order to get the job done
-$(eval $(call BuildPackage,raspi-gpio))
+$(eval $(call BuildPackage,$(PKG_NAME)))
 

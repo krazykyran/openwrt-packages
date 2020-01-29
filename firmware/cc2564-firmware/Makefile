@@ -27,4 +27,5 @@ define Package/$(PKG_NAME)/install
 	$(INSTALL_DIR) $(1)/lib/firmware/ti-connectivity
 	$(INSTALL_DATA) ./files/*.bts $(1)/lib/firmware/ti-connectivity
 endef
+
 $(eval $(call BuildPackage,$(PKG_NAME)))

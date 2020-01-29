@@ -28,4 +28,5 @@ define Package/$(PKG_NAME)/install
 	$(INSTALL_DATA) ./files/*.dfu $(1)/lib/firmware/ubertooth
 	$(INSTALL_DATA) ./files/*.hex $(1)/lib/firmware/ubertooth
 endef
+
 $(eval $(call BuildPackage,$(PKG_NAME)))

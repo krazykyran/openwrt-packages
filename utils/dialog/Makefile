@@ -17,7 +17,7 @@ PKG_MD5SUM:=4042ac67999eb46e5053ed8e9a37a455
 
 include $(INCLUDE_DIR)/package.mk
 
-define Package/dialog
+define Package/$(PKG_NAME)
   SECTION:=utils
   CATEGORY:=Utilities
   DEPENDS:=+libncurses
@@ -25,13 +25,13 @@ define Package/dialog
   URL:=http://invisible-island.net/dialog/
 endef
 
-define Package/dialog/description
+define Package/$(PKG_NAME)/description
  A script-interpreter which provides a set of curses widgets.
 endef
 
-define Package/dialog/install
+define Package/$(PKG_NAME)/install
 	$(INSTALL_DIR) $(1)/usr/bin
 	$(INSTALL_BIN) $(PKG_BUILD_DIR)/dialog $(1)/usr/bin
 endef
 
-$(eval $(call BuildPackage,dialog))
+$(eval $(call BuildPackage,$(PKG_NAME)))

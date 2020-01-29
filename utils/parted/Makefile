@@ -18,7 +18,7 @@ PKG_MD5SUM:=090655d05f3c471aa8e15a27536889ec
 
 include $(INCLUDE_DIR)/package.mk
 
-define Package/parted
+define Package/$(PKG_NAME)
   SECTION:=utils
   CATEGORY:=Utilities
   SUBMENU:=Disc
@@ -27,7 +27,7 @@ define Package/parted
   DEPENDS:=@!LINUX_2_4 +libblkid +libuuid
 endef
 
-define Package/parted/description
+define Package/$(PKG_NAME)/description
 	parted Partition editor
 	http://www.gnu.org/software/parted/index.shtml
 endef
@@ -40,7 +40,7 @@ define Build/Configure
 	)
 endef
 
-define Package/parted/install	
+define Package/$(PKG_NAME)/install	
 	$(INSTALL_DIR) $(1)/usr/sbin
 	$(INSTALL_DIR) $(1)/usr/lib
 	$(CP)          $(PKG_INSTALL_DIR)/usr/lib/*.so*      $(1)/usr/lib
@@ -48,4 +48,4 @@ define Package/parted/install
 	$(INSTALL_BIN) $(PKG_INSTALL_DIR)/usr/sbin/partprobe $(1)/usr/sbin
 endef
 
-$(eval $(call BuildPackage,parted))
+$(eval $(call BuildPackage,$(PKG_NAME)))
