@@ -4,9 +4,9 @@ PKG_NAME:=libbtbb
 PKG_VERSION:=2018-12-R1
 
 PKG_BUILD_DIR:=$(BUILD_DIR)/$(PKG_NAME)-$(PKG_VERSION)
-PKG_SOURCE:=$(PKG_VERSION).zip
-PKG_SOURCE_URL:=https://github.com/greatscottgadgets/libbtbb/archive/
-PKG_HASH:=6f15b812c2bbdb7ebbfc4e6317769cf84a6feb3c316bf3fd668f927b4bcf2901
+PKG_SOURCE_PROTO:=git
+PKG_SOURCE_URL:=https://github.com/greatscottgadgets/libbtbb.git
+PKG_SOURCE_VERSION:=9d6644005e278b5ff0211971a1491e7bb3600644
 
 include $(INCLUDE_DIR)/package.mk
 include $(INCLUDE_DIR)/cmake.mk
