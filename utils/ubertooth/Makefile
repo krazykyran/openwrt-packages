@@ -6,23 +6,22 @@ PKG_VERSION:=2018-12-R1
 PKG_BUILD_DIR:=$(BUILD_DIR)/$(PKG_NAME)-$(PKG_VERSION)
 PKG_SOURCE_PROTO:=git
 PKG_SOURCE_URL:=https://github.com/greatscottgadgets/ubertooth.git
-PKG_SOURCE_VERSION:=0adf33ee73a5ae9ee713948d19c1743fdf0e9a03
-PKG_BUILD_DEPENDS:=libbtbb
+PKG_SOURCE_VERSION:=0adf33ee73a5ae9ee713948d19c1W743fdf0e9a03
+PKG_BUILD_DEPENDS:=libbtbb bluez
 
 CMAKE_BINARY_SUBDIR:=host
 CMAKE_SOURCE_SUBDIR:=host
-CMAKE_OPTIONS:=\
-	-DLIBBTBB_INCLUDE_DIR=$(STAGING_DIR)/usr/include
+CMAKE_OPTIONS:=
+	-DLIBBTBB_INCLUDE_DIR=$(STAGING_DIR)/usr/include \
+	-DLIBBLUETOOTH_INCLUDE_DIR=$(STAGING_DIR)/usr/include
 
 include $(INCLUDE_DIR)/package.mk
 include $(INCLUDE_DIR)/cmake.mk
 
-EXTRA_CFLAGS+=
-
 define Package/$(PKG_NAME)
 	SECTION:=utils
 	CATEGORY:=Utilities
-	DEPENDS:=+libbtbb +libusb-1.0 +bluez-libs
+	DEPENDS:=+libbtbb +libusb-1.0 +bluez-libs +ubertooth-firmware
 	TITLE:=Project Ubertooth
 endef
 
@@ -34,9 +33,15 @@ endef
 
 define Package/$(PKG_NAME)/install
 	$(INSTALL_DIR) $(1)/usr/bin
+	$(INSTALL_BIN) $(PKG_INSTALL_DIR)/usr/bin/ubertooth-util $(1)/usr/bin/
+	$(INSTALL_BIN) $(PKG_INSTALL_DIR)/usr/bin/ubertooth-dfu $(1)/usr/bin/
+	$(INSTALL_BIN) $(PKG_INSTALL_DIR)/usr/bin/ubertooth-rx $(1)/usr/bin/
 	$(INSTALL_DIR) $(1)/usr/include
+	$(CP) $(PKG_INSTALL_DIR)/usr/include/* $(1)/usr/include/
 	$(INSTALL_DIR) $(1)/usr/lib
-	$(INSTALL_DIR) $(1)/usr/lib/pkgconfig
+	$(INSTALL_DATA) $(PKG_INSTALL_DIR)/usr/lib/libubertooth.so.1.1 $(1)/usr/lib/
+	$(LN) ./libubertooth.so.1.1 $(1)/usr/lib/libubertooth.so.1
+	$(LN) ./libubertooth.so.1 $(1)/usr/lib/libubertooth.so
 endef
 
 $(eval $(call BuildPackage,$(PKG_NAME)))
