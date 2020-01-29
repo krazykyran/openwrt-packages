@@ -9,6 +9,9 @@ PKG_SOURCE_URL:=https://github.com/greatscottgadgets/ubertooth.git
 PKG_SOURCE_VERSION:=0adf33ee73a5ae9ee713948d19c1743fdf0e9a03
 PKG_BUILD_DEPENDS:=libbtbb
 
+CMAKE_BINARY_SUBDIR:=host
+MAKE_PATH:=host
+
 include $(INCLUDE_DIR)/package.mk
 include $(INCLUDE_DIR)/cmake.mk
 
@@ -33,4 +36,3 @@ define Package/$(PKG_NAME)/install
 endef
 
 $(eval $(call BuildPackage,$(PKG_NAME)))
-
