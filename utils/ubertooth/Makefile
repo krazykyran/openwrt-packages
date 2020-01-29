@@ -44,4 +44,13 @@ define Package/$(PKG_NAME)/install
 	$(LN) ./libubertooth.so.1 $(1)/usr/lib/libubertooth.so
 endef
 
+define Build/InstallDev
+	$(INSTALL_DIR) $(1)/usr/include
+	$(CP) $(PKG_INSTALL_DIR)/usr/include/* $(1)/usr/include/
+	$(INSTALL_DIR) $(1)/usr/lib
+	$(INSTALL_DATA) $(PKG_INSTALL_DIR)/usr/lib/libubertooth.so.1.1 $(1)/usr/lib/
+	$(LN) ./libubertooth.so.1.1 $(1)/usr/lib/libubertooth.so.1
+	$(LN) ./libubertooth.so.1 $(1)/usr/lib/libubertooth.so
+endef
+
 $(eval $(call BuildPackage,$(PKG_NAME)))
