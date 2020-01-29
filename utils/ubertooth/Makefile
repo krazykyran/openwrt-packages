@@ -15,6 +15,8 @@ CMAKE_SOURCE_SUBDIR:=host
 include $(INCLUDE_DIR)/package.mk
 include $(INCLUDE_DIR)/cmake.mk
 
+EXTRA_CFLAGS+=DLIBBTBB_INCLUDE_DIR=$(STAGING_DIR)/usr/include
+
 define Package/$(PKG_NAME)
 	SECTION:=utils
 	CATEGORY:=Utilities
