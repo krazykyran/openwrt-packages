@@ -22,5 +22,5 @@ define Package/$(PKG_NAME)/install
 	$(INSTALL_BIN) 	./files/usr/bin/* $(1)/usr/bin
 endef
 
-$(eval $(call BuildPackage,raspi-gpio))
+$(eval $(call BuildPackage,$(PKG_NAME)))
 
