@@ -11,11 +11,13 @@ PKG_BUILD_DEPENDS:=libbtbb
 
 CMAKE_BINARY_SUBDIR:=host
 CMAKE_SOURCE_SUBDIR:=host
+CMAKE_OPTIONS:=\
+	-DLIBBTBB_INCLUDE_DIR=$(STAGING_DIR)/usr/include
 
 include $(INCLUDE_DIR)/package.mk
 include $(INCLUDE_DIR)/cmake.mk
 
-EXTRA_CFLAGS+=DLIBBTBB_INCLUDE_DIR=$(STAGING_DIR)/usr/include
+EXTRA_CFLAGS+=
 
 define Package/$(PKG_NAME)
 	SECTION:=utils
