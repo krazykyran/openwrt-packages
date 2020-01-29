@@ -1,0 +1,1237 @@
+#!/bin/sh
+# Part of raspi-config https://github.com/RPi-Distro/raspi-config
+#
+# See LICENSE file for copyright and license details
+
+INTERACTIVE=True
+ASK_TO_REBOOT=0
+CONFIG=/boot/config.txt
+#TEMP_FILE=/home/pi/Documents/addinisight-config-temp.txt
+
+# Version Information
+MAJOR=19
+MINOR=12
+REVISION=18
+
+is_pi () {
+  case $(opkg print-architecture) in
+    arm*)
+    return 0
+  esac
+  return 1
+}
+
+if is_pi ; then
+  CMDLINE=/boot/cmdline.txt
+else
+  CMDLINE=/proc/cmdline
+fi
+
+is_pione() {
+   if grep -q "^Revision\s*:\s*00[0-9a-fA-F][0-9a-fA-F]$" /proc/cpuinfo; then
+      return 0
+   elif grep -q "^Revision\s*:\s*[ 123][0-9a-fA-F][0-9a-fA-F][0-9a-fA-F]0[0-36][0-9a-fA-F]$" /proc/cpuinfo ; then
+      return 0
+   else
+      return 1
+   fi
+}
+
+is_pitwo() {
+   grep -q "^Revision\s*:\s*[ 123][0-9a-fA-F][0-9a-fA-F][0-9a-fA-F]04[0-9a-fA-F]$" /proc/cpuinfo
+   return $?
+}
+
+is_pizero() {
+   grep -q "^Revision\s*:\s*[ 123][0-9a-fA-F][0-9a-fA-F][0-9a-fA-F]0[9cC][0-9a-fA-F]$" /proc/cpuinfo
+   return $?
+}
+
+is_pithree() {
+   grep -E -q "a02082|a22082" /proc/cpuinfo
+   return $?
+}
+
+is_pithreeplus() {
+   grep -E -q "a020d3|a220d3" /proc/cpuinfo
+   return $?
+}
+
+get_pi_type() {
+   if is_pione; then
+      echo 1
+   elif is_pitwo; then
+      echo 2
+   elif is_pithree; then
+      echo 3
+   elif is_pithreeplus; then
+      echo 3+
+   else
+      echo 0
+   fi
+}
+
+is_live() {
+    grep -q "boot=live" $CMDLINE
+    return $?
+}
+
+is_ssh() {
+  if pstree -p | egrep -q -e ".*dropbear*"; then
+    return 0
+  else
+    return 1
+  fi
+}
+
+get_init_sys() {
+  if command -v systemctl > /dev/null && systemctl | grep -q '\-\.mount'; then
+    SYSTEMD=1
+  elif [ -f /etc/init.d/cron ] && [ ! -h /etc/init.d/cron ]; then
+    SYSTEMD=0
+  else
+    echo "Unrecognised init system"
+    return 1
+  fi
+}
+
+calc_wt_size() {
+  # NOTE: it's tempting to redirect stderr to /dev/null, so supress error 
+  # output from tput. However in this case, tput detects neither stdout or 
+  # stderr is a tty and so only gives default 80, 24 values
+  WT_HEIGHT=20
+  WT_WIDTH=$(tput cols)
+
+  if [ -z "$WT_WIDTH" ] || [ "$WT_WIDTH" -lt 60 ]; then
+    WT_WIDTH=80
+  fi
+  if [ "$WT_WIDTH" -gt 178 ]; then
+    WT_WIDTH=120
+  fi
+  WT_MENU_HEIGHT=$(($WT_HEIGHT-10))
+}
+
+do_about() {
+  whiptail --title "EDGE Configuration Tool (edge-config)" \
+           --msgbox "\
+This tool provides a straight-forward way of doing initial configuration
+of the EDGE bluetooth/wifi collector station.
+
+- Use the Addinsight menu to set the site ID, broadcast name and
+  server IP address for this station.
+
+- Use the Network menu to configure ethernet and cellular modem settings
+  including IP addresses, Cellular APN, username and password.
+
+- For other system settings, use the raspi-config program.
+  To use this type \"sudo raspi-config\" at the prompt." \
+  20 76 1
+}
+
+get_can_expand() {
+  get_init_sys
+  if [ $SYSTEMD -eq 1 ]; then
+    ROOT_PART=$(mount | sed -n 's|^/dev/\(.*\) on / .*|\1|p')
+  else
+    if ! [ -h /dev/root ]; then
+      echo 1
+      exit
+    fi
+    ROOT_PART=$(readlink /dev/root)
+  fi
+
+  PART_NUM=${ROOT_PART#mmcblk0p}
+  if [ "$PART_NUM" = "$ROOT_PART" ]; then
+    echo 1
+    exit
+  fi
+
+  if [ "$PART_NUM" -ne 2 ]; then
+    echo 1
+    exit
+  fi
+
+  LAST_PART_NUM=$(parted /dev/mmcblk0 -ms unit s p | tail -n 1 | cut -f 1 -d:)
+  if [ $LAST_PART_NUM -ne $PART_NUM ]; then
+    echo 1
+    exit
+  fi
+  echo 0
+}
+
+set_config_var() {
+  lua - "$1" "$2" "$3" <<EOF > "$3.bak"
+local key=assert(arg[1])
+local value=assert(arg[2])
+local fn=assert(arg[3])
+local file=assert(io.open(fn))
+local made_change=false
+for line in file:lines() do
+  if line:match("^#?%s*"..key.."=.*$") then
+    line=key.."="..value
+    made_change=true
+  end
+  print(line)
+end
+
+if not made_change then
+  print(key.."="..value)
+end
+EOF
+mv "$3.bak" "$3"
+}
+
+clear_config_var() {
+  lua - "$1" "$2" <<EOF > "$2.bak"
+local key=assert(arg[1])
+local fn=assert(arg[2])
+local file=assert(io.open(fn))
+for line in file:lines() do
+  if line:match("^%s*"..key.."=.*$") then
+    line="#"..line
+  end
+  print(line)
+end
+EOF
+mv "$2.bak" "$2"
+}
+
+get_config_var() {
+  lua - "$1" "$2" <<EOF
+local key=assert(arg[1])
+local fn=assert(arg[2])
+local file=assert(io.open(fn))
+local found=false
+for line in file:lines() do
+  local val = line:match("^%s*"..key.."=(.*)$")
+  if (val ~= nil) then
+    print(val)
+    found=true
+    break
+  end
+end
+if not found then
+   print(0)
+end
+EOF
+}
+
+do_change_root_pass() {
+  whiptail --title "Change root password" --msgbox "You will now be asked to enter a new password for the root user." 10 60 1
+  echo "Please enter your new ROOT password"
+  passwd root &&
+  whiptail --title "Change root password" --msgbox "root user password changed successfully." 10 60 1
+}
+
+do_change_pi_pass() {
+  whiptail --title "Change pi password" --msgbox "You will now be asked to enter a new password for the pi user." 10 60 1
+  echo "Please enter your new PI password"
+  passwd pi &&
+  whiptail --title "Change pi password" --msgbox "pi user password changed successfully." 10 60 1
+}
+
+do_change_data_pass() {
+  whiptail --title "Change data password" --msgbox "You will now be asked to enter a new password for the data user." 10 60 1
+  echo "Please enter your new DATA password"
+  passwd data &&
+  whiptail --title "Change data password" --msgbox "data user password changed successfully." 10 60 1
+}
+
+do_change_timezone() {
+  if [ "$INTERACTIVE" = True ]; then
+    true
+    #dpkg-reconfigure tzdata
+  else
+    local TIMEZONE="$1"
+    if [ ! -f "/usr/share/zoneinfo/$TIMEZONE" ]; then
+      return 1;
+    fi
+    rm /etc/localtime
+    echo "$TIMEZONE" > /etc/timezone
+    dpkg-reconfigure -f noninteractive tzdata
+  fi
+}
+
+get_hostname() {
+	uci get system.@system[0].hostname -q
+}
+
+do_hostname() {
+whiptail --title "Hostname Configuration" \
+         --msgbox "\
+Please note: RFCs mandate that a hostname's labels \
+may contain only the ASCII letters 'a' through 'z' (case-insensitive),
+the digits '0' through '9', and the hyphen.
+Hostname labels cannot begin or end with a hyphen.
+No other symbols, punctuation characters, or blank spaces are permitted.\
+" 12 70
+
+  CURRENT_HOSTNAME=$(get_hostname)
+  NEW_HOSTNAME=$(whiptail --title "Hostname Configuration" --inputbox "Please enter a hostname" 10 60 "$CURRENT_HOSTNAME" 3>&1 1>&2 2>&3)
+  RET=$?
+  if [ $RET -eq 0 ]; then
+    uci set system.@system[0].hostname='$NEW_HOSTNAME'
+    uci commit system
+    hostname $NEW_HOSTNAME
+    sed -i "s/127.0.1.1.*$CURRENT_HOSTNAME/127.0.1.1\t$NEW_HOSTNAME/g" /etc/hosts
+    ASK_TO_REBOOT=1
+  fi
+}
+
+do_finish() {
+  #disable_raspi_config_at_boot
+  if [ $ASK_TO_REBOOT -eq 1 ]; then
+    whiptail --title "Reboot" --yesno "Would you like to reboot now?" 10 60 2
+    if [ $? -eq 0 ]; then # yes
+      sync
+      reboot
+    fi
+  fi
+  exit 0
+}
+
+nonint() {
+    $*
+}
+
+do_system_menu() {
+while true; do
+  FUN=$(whiptail --title "System Configuration Menu (edge-config)" \
+                 --menu "Please select one of these System items to configure:" $WT_HEIGHT $WT_WIDTH $WT_MENU_HEIGHT \
+                 --cancel-button Back \
+                 --ok-button Select \
+    "S1 Change Hostname" "Set the FQDN Hostname of this system" \
+    "S2 Change Timezone" "Set up timezone to match your location" \
+    "S3 Site ID        " "Configure the Addinsight Site ID" \
+    "S4 Server IP      " "Configure the Addinsight Server FQDN or IP address" \
+    "S5 Server Port    " "Configure the Addinsight Server port number" \
+    "S6 Collector      " "Configure the Collector options" \
+    3>&1 1>&2 2>&3)
+  RET=$?
+  if [ $RET -eq 1 ]; then
+    break
+  elif [ $RET -eq 0 ]; then
+    case "$FUN" in
+      S1\ *) do_hostname ;;
+      S2\ *) do_change_timezone ;;
+      S3\ *) do_addinsight_site_id ;;
+      S4\ *) do_addinsight_addr ;;
+      S5\ *) do_addinsight_port ;;
+      S6\ *) do_collector_menu ;;
+      *) whiptail --msgbox "Programmer error: unrecognized option" 20 60 1 ;;
+    esac || whiptail --msgbox "There was an error running option $FUN" 20 60 1
+  fi
+done
+return 0
+}
+
+get_addinsight_site_id() {
+  uci get edge.addinsight.site_id -q
+}
+
+do_addinsight_site_id() {
+  CURR_SITE_ID=$(get_addinsight_site_id)
+  NEW_SITE_ID=$(whiptail --title "Addinsight Site ID Configuration" --inputbox "Please Enter the new Addinsight Site ID Number:\n\nNote: this is numerical only!" 10 60 "$CURR_SITE_ID" 3>&1 1>&2 2>&3)
+  RET=$?
+  if [ $RET -eq 0 ]; then
+    # adjust the parameter only if a non-zero length string is entered
+    if [ ! -z $NEW_SITE_ID ]; then
+      echo "Current Site ID = $CURR_SITE_ID"
+      echo "    New Site ID = $NEW_SITE_ID"
+      uci set edge.addinsight.site_id='$NEW_SITE_ID'
+      uci set edge.connectblue.agln='BT$NEW_SITE_ID'
+      uci set edge.beacon.name='bt$NEW_SITE_ID'
+      uci commit edge
+      ASK_TO_REBOOT=1
+    fi
+  fi
+}
+
+get_addinsight_addr() {
+  uci get edge.addinsight.server_ip -q
+}
+
+do_addinsight_addr() {
+  CURR_ADDINSIGHT_Addr=$(get_addinsight_addr)
+  NEW_ADDINSIGHT_Addr=$(whiptail --title "Addinsight Server Address Configuration" --inputbox "Please Enter the AddInsight Server FQDN or IP Address:" 10 60 $CURR_ADDINSIGHT_Addr 3>&1 1>&2 2>&3)
+  RET=$?
+  if [ $? -eq 0 ]; then
+    # adjust the parameter only if a non-zero length string is entered
+    if [ ! -z $NEW_ADDINSIGHT_Addr ]; then
+      echo "Current Addinsight Address = $CURR_ADDINSIGHT_Addr"
+      echo "    New Addinsight Address = $NEW_ADDINSIGHT_Addr"
+      uci set edge.addinsight.server_ip='NEW_ADDINSIGHT_Addr'
+      uci commit edge
+      ASK_TO_REBOOT=1
+    fi
+  fi
+}
+
+get_addinsight_port() {
+  uci get edge.addinsight.server_port -q
+}
+
+do_addinsight_port() {
+  CURR_ADDINSIGHT_Port=$(get_addinsight_port)
+  if [ "$INTERACTIVE" = True ]; then
+    NEW_ADDINSIGHT_Port=$(whiptail --title "Addinsight Server Port Configuration" --inputbox "Please Enter the AddInsight Server Port (default 2000):" 10 60 $CURR_ADDINSIGHT_Port 3>&1 1>&2 2>&3)
+  else
+    NEW_ADDINSIGHT_Port=$1
+    true
+  fi
+  if [ $? -eq 0 ]; then
+    # adjust the parameter only if a non-zero length string is entered
+    if [ ! -z $NEW_ADDINSIGHT_Port ]; then
+      echo "Current Addinsight Port = $CURR_ADDINSIGHT_Port"
+      echo "    New Addinsight Port = $NEW_ADDINSIGHT_Port"
+      uci set edge.addinsight.server_port='NEW_ADDINSIGHT_Port'
+      uci commit edge
+      ASK_TO_REBOOT=1
+    fi
+  fi
+}
+
+do_network_menu() {
+  while true; do
+    FUN=$(whiptail --title "Network Configuration Menu (edge-config)" \
+                   --menu "Please select the interface to configure:" $WT_HEIGHT $WT_WIDTH $WT_MENU_HEIGHT \
+                   --cancel-button Back \
+                   --ok-button Select \
+      "N1 eth0    " "Ethernet interface settings (required if Cellular not used)" \
+      "N2 ppp0    " "Cellular modem interface settings (optional)" \
+      "N3 NTP     " "Network Time Service settings (required)" \
+      3>&1 1>&2 2>&3)
+    RET=$?
+    if [ $RET -eq 1 ]; then
+      break
+    elif [ $RET -eq 0 ]; then
+      case "$FUN" in
+        N1\ *) do_network_eth0 ;;
+        N2\ *) do_network_ppp0 ;;
+        N3\ *) do_network_NTP ;;
+        *) whiptail --msgbox "Programmer error: unrecognized option" 20 60 1 ;;
+      esac || whiptail --msgbox "There was an error running option $FUN" 20 60 1
+    fi
+  done
+  return 0
+}
+
+get_network_setting() {
+  iface_name=$1     # 1st argument = interface name
+  param_name=$2     # 2nd argument = network setting
+  uci get network.$(iface_name).$(param_name) -q
+}
+
+do_network_eth0() {
+  NEW_NETWORK_TYPE=$1 # dhcp or static
+  CURR_NETWORK_TYPE=$(get_network_setting lan proto)
+  TYPE_DHCP="OFF"
+  TYPE_STATIC="OFF"
+  if [ "$CURR_NETWORK_TYPE" = "dhcp" ]; then
+    TYPE_DHCP="ON"
+  fi
+  if [ "$CURR_NETWORK_TYPE" = "static" ]; then
+    TYPE_STATIC="ON"
+  fi
+  NEW_NETWORK_TYPE=$( whiptail \
+      --title "eth0 Interface Configuration Type" \
+      --radiolist "Choose IP configuration type for:\n  address, subnet mask, gateway, DNS, domain" 10 60 2 \
+    "DHCP"   "automatic configuration type" $TYPE_DHCP \
+    "STATIC" "manual configuration type" $TYPE_STATIC \
+    3>&1 1>&2 2>&3)
+  RET=$?
+  if [ $RET -eq 1 ]; then # user selected <Cancel>
+    return 0
+  fi
+  
+  if [ "$NEW_NETWORK_TYPE" = "DHCP" ]; then
+    uci set network.lan.proto='dhcp'
+    uci commit network
+    
+    ASK_TO_REBOOT=1
+    return 0
+  fi
+  
+  if [ "$NEW_NETWORK_TYPE" = "STATIC" ]; then
+    CURR_Static_Addr=$(get_network_setting lan ipaddr)
+    CURR_Static_Mask=$(get_network_setting lan netmask)
+    CURR_Static_Gate=$(get_network_setting lan gateway)
+    CURR_Static_DNS_Addr=$(get_network_setting lan dns)
+    
+    # Print results to console for checking      
+    echo "Current Static Address = $CURR_Static_Addr"
+    echo "Current Static Netmask = $CURR_Static_Mask"
+    echo "Current Static Gateway = $CURR_Static_Gate"
+    echo "Current Static DNS Addresses = $CURR_Static_DNS_Addr"
+    
+    # ask for new STATIC IP address settings
+    NEW_Static_Addr=$(whiptail --title "eth0 Interface Configuration (IP Address)" --inputbox "Please enter the new static IP address, eg: 192.168.10.125" 10 60 "$CURR_Static_Addr" 3>&1 1>&2 2>&3)
+    if [ $? -eq 1 ]; then # user selected <Cancel>
+      return 0
+    fi
+    if [ -z "$NEW_Static_Addr" ]; then
+      return 0
+    fi
+    # ask for new STATIC IP subnet mask settings
+    NEW_Static_Mask=$(whiptail --title "eth0 Interface Configuration (Subnet Mask)" --inputbox "Please enter the subnet mask, eg: 255.255.255.0" 10 60 "$CURR_Static_Mask" 3>&1 1>&2 2>&3)
+    if [ $? -eq 1 ]; then # user selected <Cancel>
+      return 0
+    fi
+    if [ -z "$NEW_Static_Mask" ]; then
+      return 0
+    fi
+    # ask for new STATIC IP gateway, DNS and Domain settings
+    NEW_Static_Gate=$(whiptail --title "eth0 Interface Configuration (Gateway)" --inputbox "Please enter the new gateway IP address:" 10 60 "$CURR_Static_Gate" 3>&1 1>&2 2>&3)
+    NEW_Static_DNS_Addr=$(whiptail --title "eth0 Interface Configuration (DNS nameserver)" --inputbox  "Please enter the new DNS nameserver IP addresses:\n\nNote: You can enter multiple addresses, but they must be separated by a space." 12 60 "$CURR_Static_DNS_Addr" 3>&1 1>&2 2>&3)
+    # write settings
+    uci set network.lan.ipaddr='$NEW_Static_Addr'
+    uci set network.lan.netmask='$NEW_Static_Mask'
+    uci set network.lan.gateway='$NEW_Static_Gate'
+    uci set network.lan.dns='NEW_Static_DNS_Addr'
+    uci commit network
+    
+    # Print results to console for checking
+    echo "New Static Address = $NEW_Static_Addr"
+    echo "New Static Netmask = $NEW_Static_Mask"
+    echo "New Static Gateway = $NEW_Static_Gate"
+    echo "New Static DNS Addresses = $NEW_Static_DNS_Addr"
+
+    ASK_TO_REBOOT=1  
+    return 0
+  fi
+}
+
+do_network_ppp0() {
+  CURR_MODE=$(get_network_setting ppp0 proto)
+  if [ -z $CURR_MODE ]; then
+    CURR_MODE="none"
+    #TODO: export default settings
+  fi
+  CURR_DNS_Addr=$(get_network_setting ppp0 dns)
+  # Print results to console for checking
+  echo "Current ppp0 Mode = $CURR_MODE"
+  echo "Current ppp0 DNS Addresses = $CURR_DNS_Addr"
+
+  whiptail --title "ppp0 Interface Configuration (auto)" \
+           --yesno "The ppp0 network interface has been created with default settings.\n\nWould you like to start the ppp0 interface automatically on boot?" 12 60 2
+  if [ $? -eq 0 ]; then # yes, auto mode selected
+    echo "New Mode = auto"
+    #TODO: update ppp0 settings
+  else
+    echo "New Mode = manual"
+    uci set network.ppp0.proto='none'
+    uci commit network
+  fi
+
+  whiptail --title "ppp0 Interface Configuration (DNS)" \
+           --yesno "Would you like to configure the ppp0 interface DNS settings?\n\nThis allows you to override the network provider assigned settings." 12 60 2
+  if [ $? -eq 0 ]; then # yes, DNS addresses selected
+    NEW_DNS_Addr=$(whiptail --title "ppp0 Interface Configuration (DNS nameserver)" \
+                            --inputbox "Please enter the new DNS nameserver IP addresses:\n\nNote: You can enter multiple addresses, but they must be separated by a space." 12 60 "$CURR_DNS_Addr" \
+                            3>&1 1>&2 2>&3)
+    echo "New DNS Addresses = $NEW_DNS_Addr"
+    if [ ! -z "$NEW_DNS_Addr" ]; then
+      uci set network.ppp0.dns='$NEW_DNS_Addr'
+      uci commit network
+    fi
+  fi
+
+  whiptail --title "Network - Cellular SIM settings" --yesno "The following dialogs will prompt for SIM configuration settings.\n\n SIM pin unlock code (if required)\n APN:      eg. telstra.corp\n username: eg. site1@dept.state.gov.au\n password: eg. p@ssw0rd!\n\nWould you like to continue?" 16 60 2
+  if [ $? -eq 0 ]; then
+    do_network_ppp0_SIM_pin
+    do_network_ppp0_SIM_APN
+    do_network_ppp0_SIM_username_password
+  fi
+  ASK_TO_REBOOT=1
+}
+
+do_network_ppp0_SIM_pin() {
+  CURR_SIM_pin=$(get_network_setting ppp0 pincode)
+  NEW_SIM_pin=$(whiptail --title "ppp0 Interface - SIM Configuration (pin)" --inputbox "Please Enter the SIM pin unlock code:\ndefault is <blank> which means no pin required" 10 60 "$CURR_SIM_pin" 3>&1 1>&2 2>&3)
+  
+  if [ $? -eq 1 ]; then # Cancel
+    return 0
+  fi
+  echo "Current SIM pin = $CURR_SIM_pin"
+  echo "    New SIM pin = $NEW_SIM_pin"
+  if [ -z $NEW_SIM_pin ]; then
+    uci delete network.ppp0.pincode
+    uci commit network
+  else
+    uci set network.ppp0.pincode='$NEW_SIM_pin'
+    uci commit network
+  fi
+}
+
+do_network_ppp0_SIM_APN (){
+  CURR_APN=$(get_network_setting ppp0 apn)
+  NEW_APN=$(whiptail --title "ppp0 Interface - SIM Configuration (APN)" --inputbox "Please Enter the Access Point Name (APN):\ndefault is telstra.internet" 10 60 "$CURR_APN" 3>&1 1>&2 2>&3)
+  if [ $? -eq 1 ]; then # Cancel
+    return 0
+  fi
+  if [ -z "$NEW_APN" ]; then # blank APN entered
+    NEW_APN="telstra.internet"
+  fi
+  echo "Current APN = $CURR_APN"
+  echo "    New APN = $NEW_APN"
+  uci set network.ppp0.apn='$NEW_APN'
+  uci commit network
+}
+
+do_network_ppp0_SIM_username_password() {
+  CURR_Username=$(get_network_setting ppp0 username)
+  CURR_Password=$(get_network_setting ppp0 password)
+
+  whiptail --title "Network - Cellular SIM settings" \
+           --yesno "Does the SIM require a username and password?\n\nIf you select No, the SIM username/password feature will be cleared!" 10 60 2
+  if [ $? -eq 0 ]; then # Yes
+    NEW_Username=$(whiptail --title "ppp0 Interface - SIM Configuration (username)" --inputbox "Please Enter a new SIM username:" 10 60 "$CURR_Username" 3>&1 1>&2 2>&3)
+    if [ $? -eq 1 ]; then # Cancel
+      return 0
+    fi
+    NEW_Password=$(whiptail --title "ppp0 Interface - SIM Configuration (password)" --inputbox "Please Enter your SIM password:" 10 60 "$CURR_Password" 3>&1 1>&2 2>&3)
+    if [ $? -eq 1 ]; then # Cancel
+      return 0
+    fi
+  else
+    NEW_Username=""
+    NEW_Password=""
+  fi
+  
+  if [ -z $NEW_Username ]; then
+    echo "New Username = <notused>"
+    uci delete network.ppp0.username
+    uci commit network
+  else
+    echo "New Username = $NEW_Username"
+    uci set network.ppp0.username='$NEW_Username'
+    uci commit network
+  fi
+  
+  if [ -z $NEW_Password ]; then
+    echo "New Password = <notused>"
+    uci delete network.ppp0.password
+    uci commit network
+  else
+    echo "New Password = $NEW_Password"
+    uci set network.ppp0.password='$NEW_Password'
+    uci commit network
+  fi
+}
+
+get_network_NTP() {
+  uci get system.ntp.server -q
+}
+
+do_network_NTP() {
+  CURRENT_NTP=$(get_network_NTP)
+  NEW_NTP=$(whiptail --title "Network Time Service" \
+                   --inputbox "Please Enter the new NTP Network Time Server Address:\n\nNote: Separate multiple servers with space:" 12 60 "$CURRENT_NTP" \
+                   3>&1 1>&2 2>&3)
+  echo "Current NTP Servers = $CURRENT_NTP"
+  RET1=$?
+  if [ $RET1 -eq 1 ]; then # user selected <Cancel>
+    return 0
+  fi
+  if [ -z $NEW_NTP ]; then # If the value entered is a zero-length string
+    return 0
+  fi
+  uci delete system.ntp.server
+  for SERVER in $NEW_NTP
+  do
+    uci add_list system.ntp.server='$SERVER'
+  done
+  uci commit system
+  echo "New NTP Servers = $NEW_NTP"
+
+  #ASK_TO_REBOOT=1
+  service ntpd restart
+}
+
+do_services_menu() {
+  while true; do
+    FUN=$(whiptail --title "EDGE Services Menu (edge-config)" \
+                   --menu "\n\nThis section will enable or disable the following services on startup.\n\nPlease choose a service:" $WT_HEIGHT $WT_WIDTH $WT_MENU_HEIGHT \
+                   --cancel-button Back \
+                   --ok-button Select \
+      "M0 Start All     " "Enable and Start all essential services" \
+      "M1 AI-Beacon     " "Addinsight Bluetooth Beacon service (required)" \
+      "M2 AI-Collector  " "Addinsight Collector service (required)" \
+      "M3 AI-Omnia      " "Addinsight Bluetooth & Wifi MAC detection service (required)" \
+      "M4 NetworkMonitor" "Network connection monitor service" \
+      "M5 ModemMonitor  " "Cellular Modem monitor service" \
+      "M9 Stop All      " "Disable and Stop all essential services" \
+      3>&1 1>&2 2>&3)
+    RET=$?
+    if [ $RET -eq 1 ]; then
+      break
+    elif [ $RET -eq 0 ]; then
+      case "$FUN" in
+        M0\ *) do_service_essential "start" ;;
+        M1\ *) do_service_control "addinsight-beacon.service" ;;
+        M2\ *) do_service_control "addinsight-collector.service" ;;
+        M3\ *) do_service_control "addinsight-omnia.service" ;;
+        M4\ *) do_service_control "network-monitor.service" ;;
+        M5\ *) do_service_control "modem-monitor.service" ;;
+        M9\ *) do_service_essential "stop" ;;
+        *) whiptail --msgbox "Programmer error: unrecognized option" 20 60 1 ;;
+      esac || whiptail --msgbox "There was an error running option $FUN" 20 60 1
+    fi
+  done
+  return 0
+}
+
+do_service_essential() {
+  ACTION=$1
+  if [ "$ACTION" = "start" ]; then
+    service enable  addinsight-beacon
+    service enable  addinsight-collector
+    service enable  addinsight-omnia
+    service enable  network-monitor
+    service start   network-monitor
+    service enable  modem-monitor
+    service start   modem-monitor
+    ASK_TO_REBOOT=1
+  fi
+  if [ "$ACTION" = "stop" ]; then
+    service disable addinsight-beacon
+    service stop    addinsight-beacon
+    service disable addinsight-collector
+    service stop    addinsight-collector
+    service disable addinsight-omnia
+    service stop    addinsight-omnia
+    service disable network-monitor
+    service stop    network-monitor
+    ASK_TO_REBOOT=1
+  fi
+  return 0
+}
+
+do_service_control() {
+  SERVICE=$1
+  if [ -z SERVICE ]; then
+    return 0
+  fi
+  while true; do
+    # startup mode is disabled by default
+    SERVICE_ENABLED="disabled"
+    service $SERVICE is_enabled
+    if [ $? -eq 0 ]; then
+      SERVICE_ENABLED="enabled"
+    fi
+    # state is inactive by default
+      SERVICE_ACTIVE="stopped"
+      service $SERVICE is_running
+      if [ $? -eq 0 ]; then
+        SERVICE_ACTIVE="running"
+      fi
+      FUN=$(whiptail --title "EDGE Service Control Menu (edge-config)" \
+                     --menu "Please choose an action for: $SERVICE:\n The ENABLED state is: $SERVICE_ENABLED\n The ACTIVE  state is: $SERVICE_ACTIVE\n" $WT_HEIGHT $WT_WIDTH $WT_MENU_HEIGHT \
+                     --cancel-button Back \
+                     --ok-button Select \
+        "T1 Enable " "Enable the service, start on boot." \
+        "T2 Disable" "Disable the service." \
+        "T3 Start  " "Start the service." \
+        "T4 Stop   " "Stop the service." \
+        3>&1 1>&2 2>&3)
+      RET=$?
+      if [ $RET -eq 1 ]; then
+        break
+      elif [ $RET -eq 0 ]; then
+        case "$FUN" in
+          T1\ *) service enable  $SERVICE ; ASK_TO_REBOOT=1 ;;
+          T2\ *) service disable $SERVICE ; ASK_TO_REBOOT=1 ;;
+          T3\ *) service start   $SERVICE ;;
+          T4\ *) service stop    $SERVICE ;;
+          *) whiptail --msgbox "Programmer error: unrecognized option" 20 60 1 ;;
+        esac || whiptail --msgbox "There was an error running option $FUN" 20 60 1
+    fi
+  done
+  return 0
+}
+
+do_advanced_menu() {
+  while true; do
+    FUN=$(whiptail --title "EDGE Advanced Configuration Menu (edge-config)" \
+                   --menu "Please select the option to configure:" $WT_HEIGHT $WT_WIDTH $WT_MENU_HEIGHT \
+                   --cancel-button Back \
+                   --ok-button Select \
+      "A1 User Password" "change password for root and pi user accounts" \
+      "A2 Remote Syslog" "configure the remote SYSLOG server settings" \
+      3>&1 1>&2 2>&3)
+    RET=$?
+    if [ $RET -eq 1 ]; then
+      break
+    fi
+    if [ $RET -eq 0 ]; then
+      case "$FUN" in
+        A1\ *) do_change_password_menu ;;
+        A2\ *) do_rsyslog ;;
+        *) whiptail --msgbox "Programmer error: unrecognized option" 20 60 1 ;;
+      esac || whiptail --msgbox "There was an error running option $FUN" 20 60 
+    fi
+  done
+  return 0
+}
+
+do_change_password_menu() {
+  while true; do
+    FUN=$(whiptail --title "User Password Menu (edge-config)" \
+                   --menu "Please select the user to configure:" $WT_HEIGHT $WT_WIDTH $WT_MENU_HEIGHT \
+                   --cancel-button Back \
+                   --ok-button Select \
+      "A1 root " "change password for root user account" \
+      "A2 pi   " "change password for pi   user account" \
+      "A3 data " "change password for data user account" \
+      3>&1 1>&2 2>&3)
+    RET=$?
+    if [ $RET -eq 1 ]; then
+      break
+    fi
+    if [ $RET -eq 0 ]; then
+      case "$FUN" in
+        A1\ *) do_change_root_pass ;;
+        A2\ *) do_change_pi_pass ;;
+        A3\ *) do_change_data_pass ;;
+        *) whiptail --msgbox "Programmer error: unrecognized option" 20 60 1 ;;
+      esac || whiptail --msgbox "There was an error running option $FUN" 20 60 
+    fi
+  done
+  return 0
+}
+
+get_rsyslog_addr() {
+  uci get system.@system[0].log_ip -q
+}
+
+get_rsyslog_port() {
+  uci get system.@system[0].log_port -q
+}
+
+do_rsyslog() {
+  CURR_RSYSLOG_Addr=$(get_rsyslog_addr)
+  CURR_RSYSLOG_Port=$(get_rsyslog_port)
+  whiptail --title "Remote SYSLOG server configuration" --yesno "Would you like to send syslog entries to a remote RSYSLOG server?\n\nAnswering No will clear existing configuration!" 10 60 2
+  if [ $? -eq 0 ]; then # Yes
+    NEW_RSYSLOG_Addr=$(whiptail --title "Remote SYSLOG server configuration" --inputbox "Please Enter the new RSYSLOG Server Address:\n Eg. 172.20.0.2" 10 60 $CURR_RSYSLOG_Addr 3>&1 1>&2 2>&3)
+    if [ -z "$NEW_RSYSLOG_Addr" ]; then
+      NEW_RSYSLOG_Addr="172.20.0.2" #default IP address
+    fi
+
+    NEW_RSYSLOG_Port=$(whiptail --title "Remote SYSLOG server configuration" --inputbox "Please Enter the new RSYSLOG Server Port (default 514):" 10 60 $CURR_RSYSLOG_Port 3>&1 1>&2 2>&3)
+    if [ -z "$NEW_RSYSLOG_Port" ]; then
+      NEW_RSYSLOG_Port="512" #default rsyslog port
+    fi
+
+    echo "Current RSYSLOG Address = $CURR_RSYSLOG_Addr"
+    echo "    New RSYSLOG Address = $NEW_RSYSLOG_Addr"
+    echo "    New RSYSLOG Port    = $NEW_RSYSLOG_Port"
+    uci set system.@system[0].log_ip='$NEW_RSYSLOG_Addr'
+    uci set system.@system[0].log_port='$NEW_RSYSLOG_Port'
+    uci commit system
+  else
+    uci delete system.@system[0].log_ip
+    uci delete system.@system[0].log_port
+    uci commit system
+    echo "Removed RSYSLOG configuration"
+  fi
+  ASK_TO_REBOOT=1
+}
+
+do_collector_menu() {
+  while true; do
+    FUN=$(whiptail --title "Data Collector Configuration Menu (edge-config)" \
+                   --menu "Please select the option to configure:" $WT_HEIGHT $WT_WIDTH $WT_MENU_HEIGHT \
+                   --cancel-button Back \
+                   --ok-button Select \
+      "A1 Addinsight UDP" "Enable/Disable the Addinsight UDP packet format" \
+      "A2 QTDF & Kafka  " "Enable/Disable the QTDF & Kafka Data Streaming" \
+      "A3 Device ID     " "Configure the QTDF Device ID" \
+      "A4 Kafka Topic   " "Configure the Kafka queue topic name" \
+      "A5 Kafka IP      " "Configure the Kafka Server FQDN or IP address" \
+      "A6 Kafka Port    " "Configure the Kafka Server port number" \
+      "A7 Log Desc      " "Configure the QTDF log header description" \
+      "A8 Log Settings  " "Configure the QTDF log flush and rollover period" \
+      "A9 GPS Location  " "Configure the QTDF Site GPS coordinates" \
+      3>&1 1>&2 2>&3)
+    RET=$?
+    if [ $RET -eq 1 ]; then
+      break
+    elif [ $RET -eq 0 ]; then
+      case "$FUN" in
+        A1\ *) do_addinsight_udp_enable ;;
+        A2\ *) do_qtdf_enable ;;
+        A3\ *) do_qtdf_device_id ;;
+        A4\ *) do_kafka_topic ;;
+        A5\ *) do_kafka_addr ;;
+        A6\ *) do_kafka_port ;;
+        A7\ *) do_qtdf_desc ;;
+        A8\ *) do_qtdf_log_settings ;;
+        A9\ *) do_qtdf_gps;;
+        *) whiptail --msgbox "Programmer error: unrecognized option" 20 60 1 ;;
+      esac || whiptail --msgbox "There was an error running option $FUN" 20 60 
+    fi
+  done
+  return 0
+}
+
+get_qtdf_enable() {
+  uci get edge.qtdf.enabled -q
+}
+
+do_qtdf_enable() {
+  CURR_QTDF_Enable=$(get_qtdf_enable)
+  QTDF_Enable="OFF"
+  QTDF_Disable="OFF"
+  if [ $CURR_QTDF_Enable = "true" ]; then
+    QTDF_Enable="ON"
+  fi
+  if [ $CURR_QTDF_Enable = "false" ]; then
+    QTDF_Disable="ON"
+  fi
+  NEW_QTDF_Enable=$( whiptail \
+      --title "QTDF & Kafka Data Streaming" \
+      --radiolist "Choose QTDF & Kafka Data Streaming option:\n" 10 60 2 \
+    "Disable" "QTDF & Kafka Data Streaming (default)" $QTDF_Disable \
+    "Enable " "QTDF & Kafka Data Streaming" $QTDF_Enable \
+    3>&1 1>&2 2>&3)
+  RET=$?
+  if [ $RET -eq 1 ]; then # user selected <Cancel>
+    return 0
+  fi
+  if [ $NEW_QTDF_Enable = "Enable" ]; then
+    uci set edge.qtdf.enabled='true'
+    uci commit edge
+  fi
+  if [ $NEW_QTDF_Enable = "Disable" ]; then
+    uci set edge.qtdf.enabled='false'
+    uci commit edge
+  fi
+  echo "Current QTDF Enable = $CURR_QTDF_Enable"
+  echo "    New QTDF Enable = $NEW_QTDF_Enable"
+  ASK_TO_REBOOT=1
+  return 0
+}
+
+get_addinsight_udp_enable() {
+  uci get edge.addinsight.enabled -q
+}
+
+do_addinsight_udp_enable() {
+  CURR_ADDINSIGHT_UDP_Enable=$(get_addinsight_udp_enable)
+  ADDINSIGHT_UDP_Enable="OFF"
+  ADDINSIGHT_UDP_Disable="OFF"
+  if [ $CURR_ADDINSIGHT_UDP_Enable = "true" ]; then
+    ADDINSIGHT_UDP_Enable="ON"
+  fi
+  if [ $CURR_ADDINSIGHT_UDP_Enable = "false" ]; then
+    ADDINSIGHT_UDP_Disable="ON"
+  fi
+  NEW_ADDINSIGHT_UDP_Enable=$( whiptail \
+      --title "Addinsight UDP Data Format" \
+      --radiolist "Choose Addinsight UDP Data Format option:\n" 10 60 2 \
+    "Disable" "Addinsight UDP Data Format" $ADDINSIGHT_UDP_Disable \
+    "Enable " "Addinsight UDP Data Format (default)" $ADDINSIGHT_UDP_Enable \
+    3>&1 1>&2 2>&3)
+  RET=$?
+  if [ $RET -eq 1 ]; then # user selected <Cancel>
+    return 0
+  fi
+  if [ $NEW_ADDINSIGHT_UDP_Enable = "Enable" ]; then
+    uci set edge.addinsight.enabled='true'
+    uci commit edge
+  fi
+  if [ $NEW_ADDINSIGHT_UDP_Enable = "Disable" ]; then
+    uci set edge.addinsight.enabled='false'
+    uci commit edge
+  fi
+  echo "Current Addinsight UDP Enable = $CURR_ADDINSIGHT_UDP_Enable"
+  echo "    New Addinsight UDP Enable = $NEW_ADDINSIGHT_UDP_Enable"
+  ASK_TO_REBOOT=1
+  return 0
+}
+
+get_qtdf_device_id() {
+  uci get edge.qtdf.device_id -q
+}
+
+do_qtdf_device_id() {
+  CURR_QTDF_DeviceID=$(get_qtdf_device_id)
+  NEW_QTDF_DeviceID=$(whiptail --title "QTDF Device ID configuration" --inputbox "Please Enter the new QTDF Device ID:" 10 60 "$CURR_QTDF_DeviceID" 3>&1 1>&2 2>&3)
+  RET=$?
+  if [ $RET -eq 1 ]; then # user selected <Cancel>
+    return 0
+  fi
+  # adjust the parameter only if a non-zero length string is entered
+  if [ -z $NEW_QTDF_DeviceID ]; then
+    return 0
+  fi
+  echo "Current QTDF Device ID = $CURR_QTDF_DeviceID"
+  echo "    New QTDF Device ID = $NEW_QTDF_DeviceID"
+  uci set edge.qtdf.device_id='$NEW_QTDF_DeviceID'
+  uci commit edge
+  ASK_TO_REBOOT=1
+  return 0
+}
+
+get_kafka_topic() {
+  uci get edge.qtdf.kafka_topic -q
+}
+
+do_kafka_topic() {
+  CURR_KAFKA_Topic=$(get_kafka_topic)
+  NEW_KAFKA_Topic=$(whiptail --title "Kafka Topic configuration" --inputbox "Please Enter the new Kafka Topic name:" 10 60 "$CURR_KAFKA_Topic" 3>&1 1>&2 2>&3)
+  RET=$?
+  if [ $RET -eq 1 ]; then # user selected <Cancel>
+    return 0
+  fi
+  # adjust the parameter only if a non-zero length string is entered
+  if [ -z $NEW_KAFKA_Topic ]; then
+    return 0
+  fi
+  echo "Current Kafka Topic name = $CURR_KAFKA_Topic"
+  echo "    New Kafka Topic name = $NEW_KAFKA_Topic"
+  uci set edge.qtdf.kafka_topic='$NEW_KAFKA_Topic'
+  uci commit edge
+  ASK_TO_REBOOT=1
+  return 0
+}
+
+get_kafka_addr() {
+  uci get edge.qtdf.kafka_server_ip -q
+}
+
+do_kafka_addr() {
+  CURR_KAFKA_Addr=$(get_kafka_addr)
+  NEW_KAFKA_Addr=$(whiptail --title "Kafka Server Address configuration" --inputbox "Please Enter the Kafka Server FQDN or IP Address:" 10 60 $CURR_KAFKA_Addr 3>&1 1>&2 2>&3)
+  RET=$?
+  if [ $RET -eq 1 ]; then # user selected <Cancel>
+    return 0
+  fi
+  # adjust the parameter only if a non-zero length string is entered
+  if [ -z $NEW_KAFKA_Addr ]; then
+    return 0
+  fi
+  echo "Current Kafka Address = $CURR_KAFKA_Addr"
+  echo "    New Kakfa Address = $NEW_KAFKA_Addr"
+  uci set edge.qtdf.kafka_server_ip='$NEW_KAFKA_Addr'
+  uci commit edge
+  ASK_TO_REBOOT=1
+  return 0
+}
+
+get_kafka_port() {
+  uci get edge.qtdf.kafka_server_port -q	
+}
+
+do_kafka_port() {
+  CURR_KAFKA_Port=$(get_kafka_port)
+  NEW_KAFKA_Port=$(whiptail --title "Kafka Server Port configuration" --inputbox "Please Enter the Kafka Server Port (7093):" 10 60 $CURR_KAFKA_Port 3>&1 1>&2 2>&3)
+  RET=$?
+  if [ $RET -eq 1 ]; then # user selected <Cancel>
+    return 0
+  fi
+  # adjust the parameter only if a non-zero length string is entered
+  if [ -z $NEW_KAFKA_Port ]; then
+    return 0
+  fi
+  echo "Current Kafka Port = $CURR_KAFKA_Port"
+  echo "    New Kafka Port = $NEW_KAFKA_Port"
+  uci set edge.qtdf.kafka_server_port='$NEW_KAFKA_Port'
+  uci commit edge
+  ASK_TO_REBOOT=1
+  return 0
+}
+
+get_qtdf_log_desc() {
+  uci get edge.qtdf.device_desc -q
+}
+
+do_qtdf_log_desc() {
+  CURR_QTDF_Desc=$(get_qtdf_log_desc)
+  NEW_QTDF_Desc=$(whiptail --title "QTDF log description" --inputbox "Please Enter the QTDF Log Description:" 10 60 $CURR_QTDF_Desc 3>&1 1>&2 2>&3)
+  RET=$?
+  if [ $RET -eq 1 ]; then # user selected <Cancel>
+    return 0
+  fi
+  # adjust the parameter only if a non-zero length string is entered
+  if [ -z $NEW_QTDF_Desc ]; then
+    return 0
+  fi
+  echo "Current QTDF Device Description = $CURR_QTDF_Desc"
+  echo "    New QTDF Device Description = $NEW_QTDF_Desc"
+  uci set edge.qtdf.device_desc='$NEW_QTDF_Desc'
+  uci commit edge
+  ASK_TO_REBOOT=1
+  return 0
+}
+
+do_qtdf_log_settings() {
+  do_qtdf_log_flush_period
+  do_qtdf_log_rollover_period
+  return 0
+}
+
+get_qtdf_log_flush_period() {
+  uci get edge.qtdf.flush_period_minutes -q
+}
+
+do_qtdf_log_flush_period() {
+  CURR_QTDF_Flush=$(get_qtdf_log_flush_period)
+  NEW_QTDF_Flush=$(whiptail --title "QTDF log flush period" --inputbox "Please Enter the flush period in minutes (60):" 10 60 $CURR_QTDF_Flush 3>&1 1>&2 2>&3)
+  RET=$?
+  if [ $RET -eq 1 ]; then # user selected <Cancel>
+    return 0
+  fi
+  # adjust the parameter only if a non-zero length string is entered
+  if [ -z $NEW_QTDF_Flush ]; then
+    return 0
+  fi
+  echo "Current QTDF Flush= $CURR_QTDF_Flush"
+  echo "    New QTDF Flush= $NEW_QTDF_Flush"
+  uci set edge.qtdf.flush_period_minutes='$NEW_QTDF_Flush'
+  uci commit edge
+  ASK_TO_REBOOT=1
+  return 0
+}
+
+get_qtdf_log_rollover_period() {
+  uci get edge.qtdf.rollover_period_minutes -q
+}
+
+do_qtdf_log_rollover_period() {
+  CURR_QTDF_Rollover=$(get_qtdf_log_rollover_period)
+  NEW_QTDF_Rollover=$(whiptail --title "QTDF log rollover period" --inputbox "Please Enter the rollover period in minutes (1440):" 10 60 $CURR_QTDF_Rollover 3>&1 1>&2 2>&3)
+  RET=$?
+  if [ $RET -eq 1 ]; then # user selected <Cancel>
+    return 0
+  fi
+  # adjust the parameter only if a non-zero length string is entered
+  if [ -z $NEW_QTDF_Rollover ]; then
+    return 0
+  fi
+  echo "Current QTDF Rollover= $CURR_QTDF_Rollover"
+  echo "    New QTDF Rollover= $NEW_QTDF_Rollover"
+  uci set edge.qtdf.rollover_period_minutes='$NEW_QTDF_Rollover'
+  uci commit edge
+  ASK_TO_REBOOT=1
+  return 0
+}
+
+do_qtdf_gps() {
+  do_qtdf_gps_latitude
+  do_qtdf_gps_longitude
+  do_qtdf_gps_datum
+  return 0
+}
+
+get_qtdf_gps_latitude() {
+  uci get edge.qtdf.gps_latitude -q
+}
+
+do_qtdf_gps_latitude() {
+  CURR_QTDF_LATITUDE=$(get_qtdf_gps_latitude)
+  NEW_QTDF_LATITUDE=$(whiptail --title "QTDF GPS Location - Latitude" --inputbox "Please Enter the GPS latitude in decimal degrees:" 10 60 -- $CURR_QTDF_LATITUDE 3>&1 1>&2 2>&3)
+  RET=$?
+  if [ $RET -eq 1 ]; then # user selected <Cancel>
+    return 0
+  fi
+  # adjust the parameter only if a non-zero length string is entered
+  if [ -z $NEW_QTDF_LATITUDE ]; then
+    return 0
+  fi
+  echo "Current GPS Latitude= $CURR_QTDF_LATITUDE"
+  echo "    New GPS Latitude= $NEW_QTDF_LATITUDE"
+  uci set edge.qtdf.gps_latitude='$NEW_QTDF_LATITUDE'
+  uci commit edge
+  ASK_TO_REBOOT=1
+  return 0
+}
+
+get_qtdf_gps_longitude() {
+  uci get edge.qtdf.gps_longitude -q
+}
+
+do_qtdf_gps_longitude() {
+  CURR_QTDF_LONGITUDE=$(get_qtdf_gps_longitude)
+  NEW_QTDF_LONGITUDE=$(whiptail --title "QTDF GPS Location - Longitude" --inputbox "Please Enter the GPS longitude in decimal degrees:" 10 60 -- $CURR_QTDF_LONGITUDE 3>&1 1>&2 2>&3)
+  RET=$?
+  if [ $RET -eq 1 ]; then # user selected <Cancel>
+    return 0
+  fi
+  # adjust the parameter only if a non-zero length string is entered
+  if [ -z $NEW_QTDF_LONGITUDE ]; then
+    return 0
+  fi
+  echo "Current GPS Longitude= $CURR_QTDF_LONGITUDE"
+  echo "    New GPS Longitude= $NEW_QTDF_LONGITUDE"
+  uci set edge.qtdf.gps_longitude='$NEW_QTDF_LONGITUDE'
+  uci commit edge
+  ASK_TO_REBOOT=1
+  return 0
+}
+
+get_qtdf_gps_datum() {
+  uci get edge.qtdf.gps_datum -q
+}
+
+do_qtdf_gps_datum() {
+  CURR_QTDF_DATUM=$(get_qtdf_gps_datum)
+  NEW_QTDF_DATUM=$(whiptail --title "QTDF GPS Location - Datum" --inputbox "Please Enter the GPS datum (GDA94):" 10 60 $CURR_QTDF_DATUM 3>&1 1>&2 2>&3)
+  RET=$?
+  if [ $RET -eq 1 ]; then # user selected <Cancel>
+    return 0
+  fi
+  # adjust the parameter only if a non-zero length string is entered
+  if [ -z $NEW_QTDF_DATUM ]; then
+    return 0
+  fi
+  echo "Current GPS Datum= $CURR_QTDF_DATUM"
+  echo "    New GPS Datum= $NEW_QTDF_DATUM"
+  uci set edge.qtdf.gps_datum='$NEW_QTDF_DATUM'
+  uci commit edge
+  ASK_TO_REBOOT=1
+  return 0
+}
+
+#
+# Interactive use loop
+#
+if [ "$INTERACTIVE" = True ]; then
+  if ! grep -q "/boot" /proc/mounts; then
+    whiptail --msgbox "The boot partition is not mounted - cannot configure. Note that edge-config is intended for use on OpenWRT only and cannot be guaranteed to work on other operating systems." 20 60 1
+    exit 1
+  fi
+  [ -e $CONFIG ] || touch $CONFIG
+  get_init_sys
+  #echo "Resizing the display to the current screen size..."
+  #resize
+  calc_wt_size
+  while true; do
+    FUN=$(whiptail --title "EDGE Configuration Tool Ver.$MAJOR.$MINOR.$REVISION (edge-config)" \
+                   --menu "Home Page" $WT_HEIGHT $WT_WIDTH $WT_MENU_HEIGHT \
+                   --cancel-button Finish \
+                   --ok-button Select \
+      "1 System" "Configure the System settings, like hostname and timezone" \
+      "2 Network" "Configure the Ethernet and Cellular interface settings" \
+      "3 Services" "Enable/Disable and Start/Stop services" \
+      "4 Advanced" "Configure Advanced settings" \
+      "5 About" "Information about this rapid configuration tool" \
+      3>&1 1>&2 2>&3)
+    RET=$?
+    if [ $RET -eq 1 ]; then
+      do_finish
+    elif [ $RET -eq 0 ]; then
+      case "$FUN" in
+        1\ *) do_system_menu ;;
+        2\ *) do_network_menu ;;
+        3\ *) do_services_menu ;;
+        4\ *) do_advanced_menu ;;
+        5\ *) do_about ;;
+        *) whiptail --msgbox "Programmer error: unrecognized option" 20 60 1 ;;
+      esac || whiptail --msgbox "There was an error running option $FUN" 20 60 1
+    else
+      exit 1
+    fi
+  done
+fi
