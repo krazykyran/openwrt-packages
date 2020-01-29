@@ -7,7 +7,7 @@
 include $(TOPDIR)/rules.mk
 
 LUCI_TITLE:=Support for ModemManager
-LUCI_DEPENDS:=+modemmanager
+LUCI_DEPENDS:=+luci-compat +modemmanager
 
 include $(TOPDIR)/feeds/luci/luci.mk
 
