@@ -10,7 +10,7 @@ PKG_SOURCE_VERSION:=0adf33ee73a5ae9ee713948d19c1743fdf0e9a03
 PKG_BUILD_DEPENDS:=libbtbb
 
 CMAKE_BINARY_SUBDIR:=host
-MAKE_PATH:=host
+CMAKE_SOURCE_SUBDIR:=host
 
 include $(INCLUDE_DIR)/package.mk
 include $(INCLUDE_DIR)/cmake.mk
