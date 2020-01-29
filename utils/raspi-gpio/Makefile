@@ -4,7 +4,7 @@ PKG_NAME:=raspi-gpio
 PKG_VERSION:=1
 PKG_RELEASE:=1
 
-PKG_BUILD_DIR:=$(BUILD_DIR)/raspi-gpio-$(PKG_VERSION)
+PKG_BUILD_DIR:=$(BUILD_DIR)/$(PKG_NAME)-$(PKG_VERSION)
 PKG_SOURCE_PROTO:=git
 PKG_SOURCE_URL:=https://github.com/RPi-Distro/raspi-gpio.git
 PKG_SOURCE_DATE:=2019-12-05
