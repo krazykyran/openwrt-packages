@@ -14,7 +14,7 @@ PKG_RELEASE:=1
 PKG_SOURCE:=ModemManager-$(PKG_VERSION).tar.xz
 PKG_SOURCE_URL:=https://www.freedesktop.org/software/ModemManager
 PKG_HASH:=852d61755e0c1a8d0c609b17192d742b324fdd2e513f3ed64b228befb859a95b
-PKG_BUILD_DIR:=$(BUILD_DIR)/ModemManager-$(PKG_VERSION)
+PKG_BUILD_DIR:=$(BUILD_DIR)/$(PKG_NAME)-$(PKG_VERSION)
 
 PKG_MAINTAINER:=Nicholas Smith <nicholas.smith@telcoantennas.com.au>
 LICENSE:=GPL-2.0-or-later
