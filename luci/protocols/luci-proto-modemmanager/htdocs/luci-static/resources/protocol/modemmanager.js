@@ -3,15 +3,38 @@
 'require form';
 'require network';
 
-var callFileExec = rpc.declare({
-	object: 'file',
-	method: 'exec',
-	params: [ '/usr/bin/mmcli', '-m 0' ],
-	filter: function(value) {
-		var res = value.substring(value.indexOf("/sys/devices/"));
-		return res.slice(0, res.indexOf(" "));
-	}
-});
+function getModemList() {
+	return fs.exec_direct('/usr/bin/mmcli', [ '-L' ]).then(function(res) {
+		var lines = (res || '').split(/\n/),
+		    tasks = [];
+
+		for (var i = 0; i < lines.length; i++) {
+			var m = lines[i].match(/\/Modem\/(\d+)/);
+			if (m)
+				tasks.push(fs.exec_direct('/usr/bin/mmcli', [ '-m', m[1] ]));
+		}
+
+		return Promise.all(tasks).then(function(res) {
+			var modems = [];
+
+			for (var i = 0; i < res.length; i++) {
+				var man = res[i].match(/manufacturer: ([^\n]+)/),
+				    mod = res[i].match(/model: ([^\n]+)/),
+				    dev = res[i].match(/device: ([^\n]+)/);
+
+				if (dev) {
+					modems.push({
+						device:       dev[1].trim(),
+						manufacturer: (man ? man[1].trim() : '') || '?',
+						model:        (mod ? mod[1].trim() : '') || dev[1].trim()
+					});
+				}
+			}
+
+			return modems;
+		});
+	});
+}
 
 network.registerPatternVirtual(/^mobiledata-.+$/);
 network.registerErrorCode('CALL_FAILED', _('Call failed'));
@@ -53,11 +76,12 @@ return network.registerProtocol('modemmanager', {
 		o = s.taboption('general', form.ListValue, 'device', _('Modem device'));
 		o.rmempty = false;
 		o.load = function(section_id) {
-			return callFileExec().then(L.bind(function(devices) {
-				for (var i = 0; i < devices.length; i++)
-					this.value(devices[i]);
-				return form.Value.prototype.load.apply(this, [section_id]);
-			}, this));
+			return getModemList().then(L.bind(function(devices) {
+ 				for (var i = 0; i < devices.length; i++)
+					this.value(devices[i].device,
+						'%s - %s'.format(devices[i].manufacturer, devices[i].model));
+ 				return form.Value.prototype.load.apply(this, [section_id]);
+ 			}, this));
 		};
 
 		s.taboption('general', form.Value, 'apn', _('APN'));
