@@ -1,0 +1,39 @@
+#!/bin/sh
+
+#check if running as root (using sudo command), exit if not.
+if [[ ${EUID} -ne 0 ]]; then
+        echo "This tool must be run as root !!!"
+        exit 1
+fi
+
+# usb hub is 0 (-h 0), RS9113 USB module connected to port 4 (-P 4), power is off then on (-p 0)
+CMD0="hub-ctrl -h 0 -P 4 -p 0"
+CMD1="hub-ctrl -h 0 -P 4 -p 1"
+
+on() {
+  echo "powering on rs9113-usb ..."
+  $CMD1
+  echo "done"
+}
+
+off() {
+  echo "powering off rs9113-usb ..."
+  $CMD0
+  echo "done"
+}
+
+case "$1" in
+  on|start)
+    on
+    ;;
+  off|stop)
+    off
+    ;;
+  restart)
+    off
+    sleep 1
+    on
+    ;;
+  *)
+    echo "usage: $0 {on|start|off|stop|restart}"
+esac
