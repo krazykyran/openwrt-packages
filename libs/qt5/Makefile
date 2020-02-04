@@ -94,6 +94,12 @@ define Package/$(PKG_NAME)-test
   DEPENDS+=+$(PKG_NAME)-core
 endef
 
+define Package/$(PKG_NAME)-devel
+  $(call Package/$(PKG_NAME)/Default)
+  TITLE+=devel
+  DEPENDS+=+$(PKG_NAME)-core
+endef
+
 define Build/Configure
 	$(INSTALL_DIR) $(PKG_BUILD_DIR)/qtbase/lib/fonts
 	$(INSTALL_DIR) $(PKG_BUILD_DIR)/qtbase/mkspecs/linux-openwrt-g++
@@ -112,15 +118,14 @@ define Build/Configure
 		TARGET_LDFLAGS="$(TARGET_LDFLAGS) $(EXTRA_LDFLAGS) -lpthread -lrt" \
 		TARGET_INCDIRS="$(TARGET_INCDIRS)" \
 		TARGET_LIBDIRS="$(TARGET_LIBDIRS) $(STAGING_DIR)/usr/lib/" \
-		CFLAGS="$(TARGET_CFLAGS) $(TARGET_CPPFLAGS)" \
+		CFLAGS= \
 		CXXFLAGS= \
 		LDFLAGS= \
 		./configure \
-			-prefix $(CONFIGURE_PREFIX) \
-			-bindir $(CONFIGURE_PREFIX)/bin \
-			-libdir $(CONFIGURE_PREFIX)/lib \
-			-datadir $(CONFIGURE_PREFIX)/share/Qt \
-			-plugindir $(CONFIGURE_PREFIX)/lib/Qt/plugins \
+			-prefix /usr \
+			-extprefix $(TOOLCHAIN_DIR) \
+			-sysroot $(TOOLCHAIN_DIR) \
+			-plugindir /usr/lib/Qt/plugins \
 			-xplatform linux-openwrt-g++ \
 			-opensource \
 			-confirm-license \
@@ -139,11 +144,9 @@ define Build/Configure
 			-no-xcb \
 			-no-ssl \
 			-qt-zlib \
-			-qt-pcre \
 			-qt-freetype \
 			-make libs \
 			-nomake examples \
-			-nomake tools \
 			-nomake tests \
 			-skip qtdeclarative \
 			-skip qtmultimedia \
@@ -170,9 +173,6 @@ define Build/Compile
 	STAGING_DIR="$(STAGING_DIR)" \
 	STAGING_DIR_HOST="$(STAGING_DIR)/../host" \
 	PKG_CONFIG_SYSROOT="$(STAGING_DIR)" \
-	TARGET_CPPFLAGS+="-I$(STAGING_DIR)/usr/include/mysql" \
-	TARGET_LDFLAGS+="-L$(STAGING_DIR)/usr/lib/mysql -lmysqlclient" \
-	CFLAGS="$(TARGET_CFLAGS) $(TARGET_CPPFLAGS)" \
 	$(MAKE) $(PKG_JOBS) -C $(PKG_BUILD_DIR)
 endef
 
@@ -261,6 +261,11 @@ define Package/$(PKG_NAME)-test/install
 	$(CP) $(PKG_BUILD_DIR)/qtbase/lib/libQt5Test.la $(1)/usr/lib/
 endef
 
+define Package/$(PKG_NAME)-devel/install
+	$(INSTALL_DIR) $(1)/usr/bin
+	$(CP) $(PKG_BUILD_DIR)/qtbase/bin/qmake $(1)/usr/bin/
+endef
+
 $(eval $(call BuildPackage,$(PKG_NAME)-core))
 $(eval $(call BuildPackage,$(PKG_NAME)-concurrent))
 $(eval $(call BuildPackage,$(PKG_NAME)-network))
@@ -270,3 +275,4 @@ $(eval $(call BuildPackage,$(PKG_NAME)-sql))
 $(eval $(call BuildPackage,$(PKG_NAME)-xml))
 $(eval $(call BuildPackage,$(PKG_NAME)-xmlpatterns))
 $(eval $(call BuildPackage,$(PKG_NAME)-test))
+$(eval $(call BuildPackage,$(PKG_NAME)-devel))
