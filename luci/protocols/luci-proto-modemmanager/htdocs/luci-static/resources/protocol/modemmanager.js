@@ -1,5 +1,5 @@
 'use strict';
-'require rpc';
+'require fs';
 'require form';
 'require network';
 
