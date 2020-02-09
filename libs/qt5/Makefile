@@ -94,12 +94,6 @@ define Package/$(PKG_NAME)-test
   DEPENDS+=+$(PKG_NAME)-core
 endef
 
-define Package/$(PKG_NAME)-devel
-  $(call Package/$(PKG_NAME)/Default)
-  TITLE+=devel
-  DEPENDS+=+$(PKG_NAME)-core
-endef
-
 define Build/Configure
 	$(INSTALL_DIR) $(PKG_BUILD_DIR)/qtbase/lib/fonts
 	$(INSTALL_DIR) $(PKG_BUILD_DIR)/qtbase/mkspecs/linux-openwrt-g++
@@ -261,11 +255,6 @@ define Package/$(PKG_NAME)-test/install
 	$(CP) $(PKG_BUILD_DIR)/qtbase/lib/libQt5Test.la $(1)/usr/lib/
 endef
 
-define Package/$(PKG_NAME)-devel/install
-	$(INSTALL_DIR) $(1)/usr/bin
-	$(CP) $(PKG_BUILD_DIR)/qtbase/bin/qmake $(1)/usr/bin/
-endef
-
 $(eval $(call BuildPackage,$(PKG_NAME)-core))
 $(eval $(call BuildPackage,$(PKG_NAME)-concurrent))
 $(eval $(call BuildPackage,$(PKG_NAME)-network))
@@ -275,4 +264,3 @@ $(eval $(call BuildPackage,$(PKG_NAME)-sql))
 $(eval $(call BuildPackage,$(PKG_NAME)-xml))
 $(eval $(call BuildPackage,$(PKG_NAME)-xmlpatterns))
 $(eval $(call BuildPackage,$(PKG_NAME)-test))
-$(eval $(call BuildPackage,$(PKG_NAME)-devel))
