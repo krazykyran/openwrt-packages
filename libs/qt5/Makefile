@@ -32,66 +32,73 @@ RSTRIP:= \
   STRIP_KMOD="$(STRIP)" \
   $(SCRIPT_DIR)/rstrip.sh
 
-define Package/$(PKG_NAME)/Default
+define Package/qt5/Default
   SECTION:=libs
   CATEGORY:=Libraries
   SUBMENU:=Qt5
   TITLE:=qt5
   URL:=http://qt-project.org
-  DEPENDS:=+librt +zlib +libstdcpp +libpcre2-16 +libpthread +libatomic +libdouble-conversion @!LINUX_2_6
+  DEPENDS:=@!LINUX_2_6
 endef
 
-define Package/$(PKG_NAME)-core
-  $(call Package/$(PKG_NAME)/Default)
+define Package/qt5-core
+  $(call Package/qt5/Default)
   TITLE+=core
+  DEPENDS+=+libc +libdouble-conversion +libgcc +glib2 +icu +libpcre2-16 +libstdcpp +zlib
 endef
 
-define Package/$(PKG_NAME)-concurrent
-  $(call Package/$(PKG_NAME)/Default)
+define Package/qt5-concurrent
+  $(call Package/qt5/Default)
   TITLE+=concurrent
-  DEPENDS+=+$(PKG_NAME)-core
+  DEPENDS+=+libc +libgcc +qt5-core +libstdcpp
 endef
 
-define Package/$(PKG_NAME)-network
-  $(call Package/$(PKG_NAME)/Default)
+define Package/qt5-dbus
+  $(call Package/qt5/Default)
+  TITLE+=concurrent
+  DEPENDS+=+libc +dbus +libgcc +qt5-core +libstdcpp
+endef
+
+define Package/qt5-network
+  $(call Package/qt5/Default)
   TITLE+=network
-  DEPENDS+=+$(PKG_NAME)-core
+  DEPENDS+=+libc +libgcc +qt5-core +libstdcpp +zlib
 endef
 
-define Package/$(PKG_NAME)-serialport
-  $(call Package/$(PKG_NAME)/Default)
+define Package/qt5-serialport
+  $(call Package/qt5/Default)
   TITLE+=serialport
-  DEPENDS+=+$(PKG_NAME)-core
+  DEPENDS+=+libc +libgcc +qt5-core +libstdcpp +libudev-fbsd
 endef
 
-define Package/$(PKG_NAME)-widgets
-  $(call Package/$(PKG_NAME)/Default)
-  TITLE+=widgets
-  DEPENDS+=+$(PKG_NAME)-core +$(PKG_NAME)-network
+define Package/qt5-serialbus
+  $(call Package/qt5/Default)
+  TITLE+=serialbus
+  DEPENDS+=+libc +libgcc +qt5-core +qt5-network +qt5-serialport +libstdcpp
 endef
 
-define Package/$(PKG_NAME)-sql
-  $(call Package/$(PKG_NAME)/Default)
+define Package/qt5-sql
+  $(call Package/qt5/Default)
   TITLE+=sql
-  DEPENDS+=+$(PKG_NAME)-core
+  DEPENDS+=+libc +libgcc +qt5-core +libstdcpp
 endef
 
-define Package/$(PKG_NAME)-xml
-  $(call Package/$(PKG_NAME)/Default)
+define Package/qt5-xml
+  $(call Package/qt5/Default)
   TITLE+=xml
-  DEPENDS+=+$(PKG_NAME)-core
+  DEPENDS+=+libc +libgcc +qt5-core +libstdcpp
 endef
 
-define Package/$(PKG_NAME)-xmlpatterns
-  $(call Package/$(PKG_NAME)/Default)
+define Package/qt5-xmlpatterns
+  $(call Package/qt5/Default)
   TITLE+=xmlpatterns
-  DEPENDS+=+$(PKG_NAME)-core +$(PKG_NAME)-network
+  DEPENDS+=+qt5-core +qt5-network
 endef
 
-define Package/$(PKG_NAME)-test
-  $(call Package/$(PKG_NAME)/Default)
+define Package/qt5-test
+  $(call Package/qt5/Default)
   TITLE+=test
-  DEPENDS+=+$(PKG_NAME)-core
+  DEPENDS+=+libc +libgcc +qt5-core +libstdcpp
 endef
 
 define Build/Configure
@@ -130,25 +137,50 @@ define Build/Configure
 			-no-qml-debug \
 			-no-strip \
 			-no-cups \
-			-no-dbus \
 			-no-eglfs \
 			-no-kms \
 			-no-opengl \
 			-no-directfb \
 			-no-xcb \
-			-no-ssl \
+			-ssl \
 			-qt-zlib \
 			-qt-freetype \
-			-make libs \
 			-nomake examples \
-			-nomake tests \
-			-skip qtdeclarative \
-			-skip qtmultimedia \
-			-skip activeqt \
-			-skip qtdoc \
+			-skip qt3d \
+			-skip qtactiveqt \
+			-skip qtandroidextras \
+			-skip qtcanvas3d \
+			-skip qtcharts \
 			-skip qtconnectivity \
-			-skip wayland \
+			-skip qtdatavis3d \
+			-skip qtdeclarative \
+			-skip qtdoc \
+			-skip qtgamepad \
+			-skip qtgraphicaleffects \
+			-skip qtimageformats \
+			-skip qtlocation \
+			-skip qtmacextras \
+			-skip qtmultimedia \
+			-skip qtnetworkauth \
+			-skip qtpurchasing \
+			-skip qtquickcontrols \
+			-skip qtquickcontrols2 \
+			-skip qtremoteobjects \
 			-skip qtscript \
+			-skip qtscxml \
+			-skip qtsensors \
+			-skip qtspeech \
+			-skip qtsvg \
+			-skip qttools \
+			-skip qttranslations \
+			-skip qtvirtualkeyboard \
+			-skip qtwayland \
+			-skip qtwebchannel \
+			-skip qtwebengine \
+			-skip qtwebsockets \
+			-skip qtwebview \
+			-skip qtwinextras \
+			-skip qtx11extras \
 			-v \
 	)
 endef
@@ -176,91 +208,95 @@ define Build/InstallDev
 	$(CP) $(PKG_BUILD_DIR)/qtbase/bin/qt.conf $(TOOLCHAIN_DIR)/bin/
 endef
 
-define Package/$(PKG_NAME)-core/install
+define Package/qt5-core/install
 	$(INSTALL_DIR) $(1)/usr/lib/
 	$(CP) $(PKG_BUILD_DIR)/qtbase/lib/libQt5Core.so* $(1)/usr/lib/
 	$(CP) $(PKG_BUILD_DIR)/qtbase/lib/libQt5Core.prl $(1)/usr/lib/
 	$(CP) $(PKG_BUILD_DIR)/qtbase/lib/libQt5Core.la $(1)/usr/lib/
+	$(INSTALL_DIR) $(1)/usr/lib/pkgconfig
+	$(CP) $(PKG_BUILD_DIR)/qtbase/lib/pkgconfig/Qt5Core.pc $(1)/usr/lib/pkgconfig/
 endef
 
-define Package/$(PKG_NAME)-concurrent/install
+define Package/qt5-concurrent/install
 	$(INSTALL_DIR) $(1)/usr/lib/
 	$(CP) $(PKG_BUILD_DIR)/qtbase/lib/libQt5Concurrent.so* $(1)/usr/lib/
 	$(CP) $(PKG_BUILD_DIR)/qtbase/lib/libQt5Concurrent.prl $(1)/usr/lib/
 	$(CP) $(PKG_BUILD_DIR)/qtbase/lib/libQt5Concurrent.la $(1)/usr/lib/
+	$(INSTALL_DIR) $(1)/usr/lib/pkgconfig
+	$(CP) $(PKG_BUILD_DIR)/qtbase/lib/pkgconfig/Qt5Concurrent.pc $(1)/usr/lib/pkgconfig/
 endef
 
-define Package/$(PKG_NAME)-network/install
+define Package/qt5-network/install
 	$(INSTALL_DIR) $(1)/usr/lib/
 	$(CP) $(PKG_BUILD_DIR)/qtbase/lib/libQt5Network.so* $(1)/usr/lib/
 	$(CP) $(PKG_BUILD_DIR)/qtbase/lib/libQt5Network.prl $(1)/usr/lib/
 	$(CP) $(PKG_BUILD_DIR)/qtbase/lib/libQt5Network.la $(1)/usr/lib/
+	$(INSTALL_DIR) $(1)/usr/lib/pkgconfig
+	$(CP) $(PKG_BUILD_DIR)/qtbase/lib/pkgconfig/Qt5Network.pc $(1)/usr/lib/pkgconfig/
 endef
 
-define Package/$(PKG_NAME)-serialport/install
+define Package/qt5-serialport/install
 	$(INSTALL_DIR) $(1)/usr/lib/
 	$(CP) $(PKG_BUILD_DIR)/qtserialport/lib/libQt5SerialPort.so* $(1)/usr/lib/
 	$(CP) $(PKG_BUILD_DIR)/qtserialport/lib/libQt5SerialPort.prl $(1)/usr/lib/
 	$(CP) $(PKG_BUILD_DIR)/qtserialport/lib/libQt5SerialPort.la $(1)/usr/lib/
+	$(INSTALL_DIR) $(1)/usr/lib/pkgconfig
+	$(CP) $(PKG_BUILD_DIR)/qtserialport/lib/pkgconfig/Qt5SerialPort.pc $(1)/usr/lib/pkgconfig/
 endef
 
-define Package/$(PKG_NAME)-widgets/install
+define Package/qt5-serialbus/install
 	$(INSTALL_DIR) $(1)/usr/lib/
-	$(INSTALL_DIR) $(1)/usr/lib/Qt/plugins/generic/
-	$(INSTALL_DIR) $(1)/usr/lib/Qt/plugins/platforms/
-	$(INSTALL_DIR) $(1)/usr/lib/Qt/plugins/imageformats/
-	$(INSTALL_DIR) $(1)/usr/lib/fonts/
-	$(CP) $(PKG_BUILD_DIR)/qtbase/lib/libQt5Gui.so* $(1)/usr/lib/
-	$(CP) $(PKG_BUILD_DIR)/qtbase/lib/libQt5Gui.prl $(1)/usr/lib/
-	$(CP) $(PKG_BUILD_DIR)/qtbase/lib/libQt5Gui.la 	$(1)/usr/lib/
-	$(CP) $(PKG_BUILD_DIR)/qtsvg/lib/libQt5Svg.so* $(1)/usr/lib/
-	$(CP) $(PKG_BUILD_DIR)/qtsvg/lib/libQt5Svg.prl $(1)/usr/lib/
-	$(CP) $(PKG_BUILD_DIR)/qtsvg/lib/libQt5Svg.la $(1)/usr/lib/
-	$(CP) $(PKG_BUILD_DIR)/qtbase/lib/libQt5Widgets.so* $(1)/usr/lib/
-	$(CP) $(PKG_BUILD_DIR)/qtbase/lib/libQt5Widgets.prl $(1)/usr/lib/
-	$(CP) $(PKG_BUILD_DIR)/qtbase/lib/libQt5Widgets.la $(1)/usr/lib/
-	$(CP) $(PKG_BUILD_DIR)/qtbase/plugins/generic/*.so $(1)/usr/lib/Qt/plugins/generic/
-	$(CP) $(PKG_BUILD_DIR)/qtbase/plugins/platforms/*.so $(1)/usr/lib/Qt/plugins/platforms/
-	$(CP) $(PKG_BUILD_DIR)/qtbase/plugins/imageformats/*.so $(1)/usr/lib/Qt/plugins/imageformats/
-	$(CP) $(PKG_BUILD_DIR)/qtbase/lib/fonts/* $(1)/usr/lib/fonts/
+	$(CP) $(PKG_BUILD_DIR)/qtserialbus/lib/libQt5SerialBus.so* $(1)/usr/lib/
+	$(CP) $(PKG_BUILD_DIR)/qtserialbus/lib/libQt5SerialBus.prl $(1)/usr/lib/
+	$(CP) $(PKG_BUILD_DIR)/qtserialbus/lib/libQt5SerialBus.la $(1)/usr/lib/
+	$(INSTALL_DIR) $(1)/usr/lib/pkgconfig
+	$(CP) $(PKG_BUILD_DIR)/qtserialbus/lib/pkgconfig/Qt5SerialBus.pc $(1)/usr/lib/pkgconfig/
 endef
 
-define Package/$(PKG_NAME)-sql/install
+define Package/qt5-sql/install
 	$(INSTALL_DIR) $(1)/usr/lib/
 	$(INSTALL_DIR) $(1)/usr/lib/Qt/plugins/sqldrivers/
 	$(CP) $(PKG_BUILD_DIR)/qtbase/lib/libQt5Sql.so* $(1)/usr/lib/
 	$(CP) $(PKG_BUILD_DIR)/qtbase/lib/libQt5Sql.prl $(1)/usr/lib/
 	$(CP) $(PKG_BUILD_DIR)/qtbase/lib/libQt5Sql.la 	$(1)/usr/lib/
 	$(CP) $(PKG_BUILD_DIR)/qtbase/plugins/sqldrivers/*.so $(1)/usr/lib/Qt/plugins/sqldrivers/
+	$(INSTALL_DIR) $(1)/usr/lib/pkgconfig
+	$(CP) $(PKG_BUILD_DIR)/qtbase/lib/pkgconfig/Qt5Sql.pc $(1)/usr/lib/pkgconfig/
 endef
 
-define Package/$(PKG_NAME)-test/install
+define Package/qt5-test/install
 	$(INSTALL_DIR) $(1)/usr/lib/
 	$(CP) $(PKG_BUILD_DIR)/qtbase/lib/libQt5Test.so* $(1)/usr/lib/
 	$(CP) $(PKG_BUILD_DIR)/qtbase/lib/libQt5Test.prl $(1)/usr/lib/
 	$(CP) $(PKG_BUILD_DIR)/qtbase/lib/libQt5Test.la $(1)/usr/lib/
+	$(INSTALL_DIR) $(1)/usr/lib/pkgconfig
+	$(CP) $(PKG_BUILD_DIR)/qtbase/lib/pkgconfig/Qt5Test.pc $(1)/usr/lib/pkgconfig/
 endef
 
-define Package/$(PKG_NAME)-xml/install
+define Package/qt5-xml/install
 	$(INSTALL_DIR) $(1)/usr/lib/
 	$(CP) $(PKG_BUILD_DIR)/qtbase/lib/libQt5Xml.so* $(1)/usr/lib/
 	$(CP) $(PKG_BUILD_DIR)/qtbase/lib/libQt5Xml.prl $(1)/usr/lib/
 	$(CP) $(PKG_BUILD_DIR)/qtbase/lib/libQt5Xml.la 	$(1)/usr/lib/
+	$(INSTALL_DIR) $(1)/usr/lib/pkgconfig
+	$(CP) $(PKG_BUILD_DIR)/qtbase/lib/pkgconfig/Qt5Xml.pc $(1)/usr/lib/pkgconfig/
 endef
 
-define Package/$(PKG_NAME)-xmlpatterns/install
+define Package/qt5-xmlpatterns/install
 	$(INSTALL_DIR) $(1)/usr/lib/
 	$(CP) $(PKG_BUILD_DIR)/qtxmlpatterns/lib/libQt5XmlPatterns.so* $(1)/usr/lib/
 	$(CP) $(PKG_BUILD_DIR)/qtxmlpatterns/lib/libQt5XmlPatterns.prl $(1)/usr/lib/
 	$(CP) $(PKG_BUILD_DIR)/qtxmlpatterns/lib/libQt5XmlPatterns.la $(1)/usr/lib/
+	$(INSTALL_DIR) $(1)/usr/lib/pkgconfig
+	$(CP) $(PKG_BUILD_DIR)/qtxmlpatterns/lib/pkgconfig/Qt5XmlPatterns.pc $(1)/usr/lib/pkgconfig/
 endef
 
-$(eval $(call BuildPackage,$(PKG_NAME)-core))
-$(eval $(call BuildPackage,$(PKG_NAME)-concurrent))
-$(eval $(call BuildPackage,$(PKG_NAME)-network))
-$(eval $(call BuildPackage,$(PKG_NAME)-serialport))
-$(eval $(call BuildPackage,$(PKG_NAME)-widgets))
-$(eval $(call BuildPackage,$(PKG_NAME)-sql))
-$(eval $(call BuildPackage,$(PKG_NAME)-xml))
-$(eval $(call BuildPackage,$(PKG_NAME)-xmlpatterns))
-$(eval $(call BuildPackage,$(PKG_NAME)-test))
+$(eval $(call BuildPackage,qt5-core))
+$(eval $(call BuildPackage,qt5-concurrent))
+$(eval $(call BuildPackage,qt5-network))
+$(eval $(call BuildPackage,qt5-serialport))
+$(eval $(call BuildPackage,qt5-serialbus))
+$(eval $(call BuildPackage,qt5-sql))
+$(eval $(call BuildPackage,qt5-test))
+$(eval $(call BuildPackage,qt5-xml))
+$(eval $(call BuildPackage,qt5-xmlpatterns))
