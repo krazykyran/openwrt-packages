@@ -55,7 +55,7 @@ endef
 
 define Package/qt5-dbus
   $(call Package/qt5/Default)
-  TITLE+=concurrent
+  TITLE+=dbus
   DEPENDS+=+libc +dbus +libgcc +qt5-core +libstdcpp
 endef
 
