@@ -293,6 +293,7 @@ endef
 
 $(eval $(call BuildPackage,qt5-core))
 $(eval $(call BuildPackage,qt5-concurrent))
+$(eval $(call BuildPackage,qt5-dbus))
 $(eval $(call BuildPackage,qt5-network))
 $(eval $(call BuildPackage,qt5-serialport))
 $(eval $(call BuildPackage,qt5-serialbus))
