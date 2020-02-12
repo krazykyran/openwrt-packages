@@ -101,6 +101,12 @@ define Package/qt5-test
   DEPENDS+=+libc +libgcc +qt5-core +libstdcpp
 endef
 
+define Package/qt5-devel
+  $(call Package/qt5/Default)
+  TITLE+=devel
+  DEPENDS+=+qt5-core +qt5-concurrent +qt5-dbus +qt5-network +qt5-serialport +qt5-serialbus +qt5-sql +qt5-xml +qt5-xmlpatterns +qt5-test
+endef
+
 define Build/Configure
 	$(INSTALL_DIR) $(PKG_BUILD_DIR)/qtbase/lib/fonts
 	$(INSTALL_DIR) $(PKG_BUILD_DIR)/qtbase/mkspecs/linux-openwrt-g++
@@ -144,9 +150,9 @@ define Build/Configure
 			-no-directfb \
 			-no-xcb \
 			-no-ssl \
-			-qt-doubleconversion \
-			-qt-zlib \
-			-qt-pcre \
+			-system-doubleconversion \
+			-system-zlib \
+			-system-pcre \
 			-qt-freetype \
 			-nomake examples \
 			-nomake tools \
@@ -218,8 +224,6 @@ define Package/qt5-core/install
 	$(CP) $(PKG_BUILD_DIR)/qtbase/lib/libQt5Core.so* $(1)/usr/lib/
 	$(CP) $(PKG_BUILD_DIR)/qtbase/lib/libQt5Core.prl $(1)/usr/lib/
 	$(CP) $(PKG_BUILD_DIR)/qtbase/lib/libQt5Core.la $(1)/usr/lib/
-	$(INSTALL_DIR) $(1)/usr/lib/pkgconfig
-	$(CP) $(PKG_BUILD_DIR)/qtbase/lib/pkgconfig/Qt5Core.pc $(1)/usr/lib/pkgconfig/
 endef
 
 define Package/qt5-concurrent/install
@@ -227,8 +231,6 @@ define Package/qt5-concurrent/install
 	$(CP) $(PKG_BUILD_DIR)/qtbase/lib/libQt5Concurrent.so* $(1)/usr/lib/
 	$(CP) $(PKG_BUILD_DIR)/qtbase/lib/libQt5Concurrent.prl $(1)/usr/lib/
 	$(CP) $(PKG_BUILD_DIR)/qtbase/lib/libQt5Concurrent.la $(1)/usr/lib/
-	$(INSTALL_DIR) $(1)/usr/lib/pkgconfig
-	$(CP) $(PKG_BUILD_DIR)/qtbase/lib/pkgconfig/Qt5Concurrent.pc $(1)/usr/lib/pkgconfig/
 endef
 
 define Package/qt5-network/install
@@ -236,8 +238,6 @@ define Package/qt5-network/install
 	$(CP) $(PKG_BUILD_DIR)/qtbase/lib/libQt5Network.so* $(1)/usr/lib/
 	$(CP) $(PKG_BUILD_DIR)/qtbase/lib/libQt5Network.prl $(1)/usr/lib/
 	$(CP) $(PKG_BUILD_DIR)/qtbase/lib/libQt5Network.la $(1)/usr/lib/
-	$(INSTALL_DIR) $(1)/usr/lib/pkgconfig
-	$(CP) $(PKG_BUILD_DIR)/qtbase/lib/pkgconfig/Qt5Network.pc $(1)/usr/lib/pkgconfig/
 endef
 
 define Package/qt5-serialport/install
@@ -245,17 +245,13 @@ define Package/qt5-serialport/install
 	$(CP) $(PKG_BUILD_DIR)/qtserialport/lib/libQt5SerialPort.so* $(1)/usr/lib/
 	$(CP) $(PKG_BUILD_DIR)/qtserialport/lib/libQt5SerialPort.prl $(1)/usr/lib/
 	$(CP) $(PKG_BUILD_DIR)/qtserialport/lib/libQt5SerialPort.la $(1)/usr/lib/
-	$(INSTALL_DIR) $(1)/usr/lib/pkgconfig
-	$(CP) $(PKG_BUILD_DIR)/qtserialport/lib/pkgconfig/Qt5SerialPort.pc $(1)/usr/lib/pkgconfig/
 endef
 
 define Package/qt5-serialbus/install
 	$(INSTALL_DIR) $(1)/usr/lib/
 	$(CP) $(PKG_BUILD_DIR)/qtserialbus/lib/libQt5SerialBus.so* $(1)/usr/lib/
 	$(CP) $(PKG_BUILD_DIR)/qtserialbus/lib/libQt5SerialBus.prl $(1)/usr/lib/
-	$(CP) $(PKG_BUILD_DIR)/qtserialbus/lib/libQt5SerialBus.la $(1)/usr/lib/
-	$(INSTALL_DIR) $(1)/usr/lib/pkgconfig
-	$(CP) $(PKG_BUILD_DIR)/qtserialbus/lib/pkgconfig/Qt5SerialBus.pc $(1)/usr/lib/pkgconfig/
+	$(CP) $(PKG_BUILD_DIR)/qtserialbus/lib/libQt5SerialBus.la $(1)/usr/lib/	
 endef
 
 define Package/qt5-sql/install
@@ -265,8 +261,6 @@ define Package/qt5-sql/install
 	$(CP) $(PKG_BUILD_DIR)/qtbase/lib/libQt5Sql.prl $(1)/usr/lib/
 	$(CP) $(PKG_BUILD_DIR)/qtbase/lib/libQt5Sql.la 	$(1)/usr/lib/
 	$(CP) $(PKG_BUILD_DIR)/qtbase/plugins/sqldrivers/*.so $(1)/usr/lib/Qt/plugins/sqldrivers/
-	$(INSTALL_DIR) $(1)/usr/lib/pkgconfig
-	$(CP) $(PKG_BUILD_DIR)/qtbase/lib/pkgconfig/Qt5Sql.pc $(1)/usr/lib/pkgconfig/
 endef
 
 define Package/qt5-test/install
@@ -274,8 +268,6 @@ define Package/qt5-test/install
 	$(CP) $(PKG_BUILD_DIR)/qtbase/lib/libQt5Test.so* $(1)/usr/lib/
 	$(CP) $(PKG_BUILD_DIR)/qtbase/lib/libQt5Test.prl $(1)/usr/lib/
 	$(CP) $(PKG_BUILD_DIR)/qtbase/lib/libQt5Test.la $(1)/usr/lib/
-	$(INSTALL_DIR) $(1)/usr/lib/pkgconfig
-	$(CP) $(PKG_BUILD_DIR)/qtbase/lib/pkgconfig/Qt5Test.pc $(1)/usr/lib/pkgconfig/
 endef
 
 define Package/qt5-xml/install
@@ -283,8 +275,6 @@ define Package/qt5-xml/install
 	$(CP) $(PKG_BUILD_DIR)/qtbase/lib/libQt5Xml.so* $(1)/usr/lib/
 	$(CP) $(PKG_BUILD_DIR)/qtbase/lib/libQt5Xml.prl $(1)/usr/lib/
 	$(CP) $(PKG_BUILD_DIR)/qtbase/lib/libQt5Xml.la 	$(1)/usr/lib/
-	$(INSTALL_DIR) $(1)/usr/lib/pkgconfig
-	$(CP) $(PKG_BUILD_DIR)/qtbase/lib/pkgconfig/Qt5Xml.pc $(1)/usr/lib/pkgconfig/
 endef
 
 define Package/qt5-xmlpatterns/install
@@ -292,7 +282,18 @@ define Package/qt5-xmlpatterns/install
 	$(CP) $(PKG_BUILD_DIR)/qtxmlpatterns/lib/libQt5XmlPatterns.so* $(1)/usr/lib/
 	$(CP) $(PKG_BUILD_DIR)/qtxmlpatterns/lib/libQt5XmlPatterns.prl $(1)/usr/lib/
 	$(CP) $(PKG_BUILD_DIR)/qtxmlpatterns/lib/libQt5XmlPatterns.la $(1)/usr/lib/
+endef
+
+define Package/qt5-devel/install
 	$(INSTALL_DIR) $(1)/usr/lib/pkgconfig
+	$(CP) $(PKG_BUILD_DIR)/qtbase/lib/pkgconfig/Qt5Core.pc $(1)/usr/lib/pkgconfig/
+	$(CP) $(PKG_BUILD_DIR)/qtbase/lib/pkgconfig/Qt5Concurrent.pc $(1)/usr/lib/pkgconfig/
+	$(CP) $(PKG_BUILD_DIR)/qtbase/lib/pkgconfig/Qt5Network.pc $(1)/usr/lib/pkgconfig/
+	$(CP) $(PKG_BUILD_DIR)/qtserialport/lib/pkgconfig/Qt5SerialPort.pc $(1)/usr/lib/pkgconfig/
+	$(CP) $(PKG_BUILD_DIR)/qtserialbus/lib/pkgconfig/Qt5SerialBus.pc $(1)/usr/lib/pkgconfig/
+	$(CP) $(PKG_BUILD_DIR)/qtbase/lib/pkgconfig/Qt5Sql.pc $(1)/usr/lib/pkgconfig/
+	$(CP) $(PKG_BUILD_DIR)/qtbase/lib/pkgconfig/Qt5Test.pc $(1)/usr/lib/pkgconfig/
+	$(CP) $(PKG_BUILD_DIR)/qtbase/lib/pkgconfig/Qt5Xml.pc $(1)/usr/lib/pkgconfig/
 	$(CP) $(PKG_BUILD_DIR)/qtxmlpatterns/lib/pkgconfig/Qt5XmlPatterns.pc $(1)/usr/lib/pkgconfig/
 endef
 
