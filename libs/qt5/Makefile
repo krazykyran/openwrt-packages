@@ -144,9 +144,9 @@ define Build/Configure
 			-no-directfb \
 			-no-xcb \
 			-ssl \
-			-system-doubleconversion \
-			-system-zlib \
-			-system-pcre \
+			-qt-doubleconversion \
+			-qt-zlib \
+			-qt-pcre \
 			-qt-freetype \
 			-nomake examples \
 			-nomake tools \
