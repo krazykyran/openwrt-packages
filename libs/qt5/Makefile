@@ -143,7 +143,7 @@ define Build/Configure
 			-no-opengl \
 			-no-directfb \
 			-no-xcb \
-			-ssl \
+			-no-ssl \
 			-qt-doubleconversion \
 			-qt-zlib \
 			-qt-pcre \
