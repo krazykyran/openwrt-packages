@@ -127,6 +127,7 @@ define Build/Configure
 			-extprefix $(TOOLCHAIN_DIR) \
 			-sysroot $(TOOLCHAIN_DIR) \
 			-plugindir /usr/lib/Qt/plugins \
+			-platform linux-g++ \
 			-xplatform linux-openwrt-g++ \
 			-opensource \
 			-confirm-license \
@@ -143,7 +144,7 @@ define Build/Configure
 			-no-directfb \
 			-no-xcb \
 			-ssl \
-			-qt-zlib \
+			-system-zlib \
 			-qt-freetype \
 			-nomake examples \
 			-skip qt3d \
