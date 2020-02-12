@@ -147,6 +147,8 @@ define Build/Configure
 			-system-zlib \
 			-qt-freetype \
 			-nomake examples \
+			-nomake tools \
+			-nomake tests \
 			-skip qt3d \
 			-skip qtactiveqt \
 			-skip qtandroidextras \
