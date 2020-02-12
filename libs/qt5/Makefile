@@ -138,6 +138,7 @@ define Build/Configure
 			-opensource \
 			-confirm-license \
 			-force-asserts \
+			-no-ssl \
 			-no-iconv \
 			-no-pch \
 			-no-rpath \
@@ -149,49 +150,51 @@ define Build/Configure
 			-no-opengl \
 			-no-directfb \
 			-no-xcb \
-			-no-ssl \
+			-no-gui \
+			-no-widgets \
 			-system-doubleconversion \
-			-system-zlib \
 			-system-pcre \
 			-qt-freetype \
+			-qt-zlib \
+			-make libs \
 			-nomake examples \
 			-nomake tools \
 			-nomake tests \
-			-skip qt3d \
-			-skip qtactiveqt \
-			-skip qtandroidextras \
-			-skip qtcanvas3d \
-			-skip qtcharts \
-			-skip qtconnectivity \
-			-skip qtdatavis3d \
-			-skip qtdeclarative \
-			-skip qtdoc \
-			-skip qtgamepad \
-			-skip qtgraphicaleffects \
-			-skip qtimageformats \
-			-skip qtlocation \
-			-skip qtmacextras \
-			-skip qtmultimedia \
-			-skip qtnetworkauth \
-			-skip qtpurchasing \
-			-skip qtquickcontrols \
-			-skip qtquickcontrols2 \
-			-skip qtremoteobjects \
-			-skip qtscript \
-			-skip qtscxml \
-			-skip qtsensors \
-			-skip qtspeech \
-			-skip qtsvg \
-			-skip qttools \
-			-skip qttranslations \
-			-skip qtvirtualkeyboard \
-			-skip qtwayland \
-			-skip qtwebchannel \
-			-skip qtwebengine \
-			-skip qtwebsockets \
-			-skip qtwebview \
-			-skip qtwinextras \
-			-skip qtx11extras \
+			-skip 3d \
+			-skip activeqt \
+			-skip androidextras \
+			-skip canvas3d \
+			-skip charts \
+			-skip connectivity \
+			-skip datavis3d \
+			-skip declarative \
+			-skip doc \
+			-skip gamepad \
+			-skip graphicaleffects \
+			-skip imageformats \
+			-skip location \
+			-skip macextras \
+			-skip multimedia \
+			-skip networkauth \
+			-skip purchasing \
+			-skip quickcontrols \
+			-skip quickcontrols2 \
+			-skip remoteobjects \
+			-skip script \
+			-skip scxml \
+			-skip sensors \
+			-skip speech \
+			-skip svg \
+			-skip tools \
+			-skip translations \
+			-skip virtualkeyboard \
+			-skip wayland \
+			-skip webchannel \
+			-skip webengine \
+			-skip websockets \
+			-skip webview \
+			-skip winextras \
+			-skip x11extras \
 			-v \
 	)
 endef
