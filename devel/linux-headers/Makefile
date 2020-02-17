@@ -2,7 +2,7 @@ include $(TOPDIR)/rules.mk
 include $(INCLUDE_DIR)/kernel.mk
 
 PKG_NAME:=linux-headers
-PKG_VERSION:=$(LINUX_VERSION)-$(LINUX_RELEASE)-$(LINUX_VERMAGIC)
+PKG_VERSION:=$(LINUX_VERSION)-$(LINUX_RELEASE)
 PKG_RELEASE:=1
 
 include $(INCLUDE_DIR)/package.mk
