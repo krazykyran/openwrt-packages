@@ -37,6 +37,10 @@ define Build/Configure
 			--arch="$(ARCH)" \
 			--cc="$(TARGET_CC)" \
 			--cxx="$(TARGET_CXX)" \
+			--ld="$(TARGET_CROSS)ld" \
+			--nm="$(TARGET_NM)" \
+			--objdump="$(TARGET_CROSS)objdump" \
+			--strip="$(TARGET_CROSS)strip" \
 			--disable-ssl \
 			--disable-sasl \
 	)
@@ -49,19 +53,9 @@ define Build/InstallDev
 	$(CP) $(PKG_INSTALL_DIR)/usr/local/lib/pkgconfig/*.pc $(1)/usr/lib/pkgconfig/
 endef
 
-define Package/librdkafka/prepare
-	mkdir -p $(PKG_BUILD_DIR)
-	$(INSTALL_DIR) $(PKG_BUILD_DIR)/usr/include
-	$(INSTALL_DIR) $(PKG_BUILD_DIR)/usr/lib
-endef
-
 define Package/librdkafka/install
 	$(INSTALL_DIR) $(1)/usr/lib
 	$(CP) $(PKG_INSTALL_DIR)/usr/local/lib/*.so* $(1)/usr/lib/
-	$(INSTALL_DIR) $(1)/usr/include/librdkafka
-	$(CP) $(PKG_INSTALL_DIR)/usr/local/include/librdkafka/*.h $(1)/usr/include/librdkafka/
-	$(INSTALL_DIR) $(1)/usr/lib/pkgconfig
-	$(CP) $(PKG_INSTALL_DIR)/usr/local/lib/pkgconfig/*.pc $(1)/usr/lib/pkgconfig/
 endef
 
 $(eval $(call BuildPackage,librdkafka))
