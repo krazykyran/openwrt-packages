@@ -1,0 +1,1 @@
+obj-$(CONFIG_RTC_PCF8523) += rtc-pcf8523.o

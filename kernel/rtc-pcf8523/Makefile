@@ -11,18 +11,15 @@ include $(INCLUDE_DIR)/kernel.mk
 PKG_NAME:=rtc-pcf8523
 PKG_RELEASE:=1
 
-PKG_BUILD_DIR:=$(KERNEL_BUILD_DIR)/$(PKG_NAME)
-
 include $(INCLUDE_DIR)/package.mk
 
 define KernelPackage/$(PKG_NAME)
 	SUBMENU:=Other modules
 	TITLE:=NXP PCF8523 RTC support
-	DEFAULT:=m if ALL_KMODS && RTC_SUPPORT
 	DEPENDS:=+kmod-i2c-core
-	KCONFIG:=CONFIG_RTC_DRV_PCF8523 \
+	FILES:=$(PKG_BUILD_DIR)/rtc-pcf8523.ko
+	KCONFIG:= \
 		CONFIG_RTC_CLASS=y
-	FILES:=$(LINUX_DIR)/drivers/rtc/rtc-pcf8523.ko
 	AUTOLOAD:=$(call AutoProbe,rtc-pcf8523)
 endef
 
@@ -31,14 +28,29 @@ define KernelPackage/$(PKG_NAME)/description
 	and calendar device.
 endef
 
-define Build/Prepare
-	mkdir -p $(PKG_BUILD_DIR)
-endef
+EXTRA_KCONFIG:= \
+	CONFIG_RTC_PCF8523=m \
+	CONFIG_RTC_CLASS=y \
+	CONFIG_RTC_INTF_DEV=y
+	
+EXTRA_CFLAGS:= \
+	$(patsubst CONFIG_%, -DCONFIG_%=1, $(patsubst %=m,%,$(filter %=m,$(EXTRA_KCONFIG)))) \
+	$(patsubst CONFIG_%, -DCONFIG_%=1, $(patsubst %=y,%,$(filter %=y,$(EXTRA_KCONFIG))))
 
-define Build/Configure
+define Build/Prepare
+	rm -rf $(PKG_BUILD_DIR)
+	mkdir -p $(PKG_BUILD_DIR)
+	$(CP) ./src/* $(PKG_BUILD_DIR)
 endef
 
 define Build/Compile
+	$(MAKE) -C "$(LINUX_DIR)" \
+		CROSS_COMPILE="$(TARGET_CROSS)" \
+		ARCH="$(LINUX_KARCH)" \
+		SUBDIRS="$(PKG_BUILD_DIR)" \
+		EXTRA_CFLAGS="$(EXTRA_CFLAGS)" \
+		$(EXTRA_KCONFIG) \
+		modules
 endef
 
 $(eval $(call KernelPackage,$(PKG_NAME)))
