@@ -35,11 +35,18 @@ define Build/Configure
 	(cd $(PKG_BUILD_DIR); \
 		./configure \
 			--arch="$(ARCH)" \
-      --cc="$(TARGET_CC)" \
+			--cc="$(TARGET_CC)" \
 			--cxx="$(TARGET_CXX)" \
 			--disable-ssl \
 			--disable-sasl \
 	)
+endef
+
+define Build/InstallDev
+	$(INSTALL_DIR) $(1)/usr/include/librdkafka
+	$(CP) $(PKG_INSTALL_DIR)/usr/local/include/librdkafka/*.h $(1)/usr/include/librdkafka/
+	$(INSTALL_DIR) $(1)/usr/lib/pkgconfig
+	$(CP) $(PKG_INSTALL_DIR)/usr/local/lib/pkgconfig/*.pc $(1)/usr/lib/pkgconfig/
 endef
 
 define Package/librdkafka/prepare
