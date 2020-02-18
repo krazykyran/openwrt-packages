@@ -1,0 +1,10 @@
+--- a/drivers/net/wireless/rsi/Kconfig
++++ b/drivers/net/wireless/rsi/Kconfig
+@@ -48,7 +48,6 @@ config RSI_USB
+ 	  Select M (recommended), if you have a RSI 1x1 wireless module.
+ 
+ config RSI_COEX
+-	depends on !KERNEL_4_17
+ 	bool "Redpine Signals WLAN BT Coexistence support"
+ 	depends on BT && RSI_91X
+ 	depends on !(BT=m && RSI_91X=y)
