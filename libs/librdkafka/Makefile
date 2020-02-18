@@ -33,7 +33,7 @@ endef
 
 define Build/Configure
 	(cd $(PKG_BUILD_DIR); \
-		$(TARGET_CONFIGURE_OPTS)
+		$(TARGET_CONFIGURE_OPTS) \
 		./configure \
 			--arch="$(ARCH)" \
 			--disable-ssl \
