@@ -33,14 +33,9 @@ endef
 
 define Build/Configure
 	(cd $(PKG_BUILD_DIR); \
+		$(TARGET_CONFIGURE_OPTS)
 		./configure \
 			--arch="$(ARCH)" \
-			--cc="$(TARGET_CC)" \
-			--cxx="$(TARGET_CXX)" \
-			--ld="$(TARGET_CROSS)ld" \
-			--nm="$(TARGET_NM)" \
-			--objdump="$(TARGET_CROSS)objdump" \
-			--strip="$(TARGET_CROSS)strip" \
 			--disable-ssl \
 			--disable-sasl \
 	)
