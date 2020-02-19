@@ -15,7 +15,7 @@ PKG_BUILD_DIR:=$(KERNEL_BUILD_DIR)/$(PKG_NAME)
 
 include $(INCLUDE_DIR)/package.mk
 
-define KernelPackage/$(PKG_NAME)
+define KernelPackage/leds-tlc591xx
 	SUBMENU:=LED modules
 	DEPENDS:=+kmod-i2c-core +kmod-regmap-i2c
 	TITLE:=TLC591xx LED support
@@ -24,7 +24,7 @@ define KernelPackage/$(PKG_NAME)
 	AUTOLOAD:=$(call AutoLoad,60,leds-tlc591xx,1)
 endef
 
-define KernelPackage/$(PKG_NAME)/description
+define KernelPackage/leds-tlc591xx/description
 	Driver for the TI TLC59108 and TLC59116 I2C LED controllers.
 endef
 
@@ -38,4 +38,4 @@ endef
 define Build/Compile
 endef
 
-$(eval $(call KernelPackage,$(PKG_NAME)))
+$(eval $(call KernelPackage,leds-tlc591xx))

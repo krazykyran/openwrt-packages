@@ -13,7 +13,7 @@ PKG_RELEASE:=1
 
 include $(INCLUDE_DIR)/package.mk
 
-define KernelPackage/$(PKG_NAME)
+define KernelPackage/serial-sc16is7xx
 	SUBMENU:=Other modules
 	DEPENDS:=+kmod-regmap-spi
 	TITLE:=NXP SC16IS7xx serial UART bridge SPI/I2C
@@ -21,7 +21,7 @@ define KernelPackage/$(PKG_NAME)
 	AUTOLOAD:=$(call AutoProbe,sc16is7xx)
 endef
 
-define KernelPackage/$(PKG_NAME)/description
+define KernelPackage/serial-sc16is7xx/description
 	Kernel module for NXP SC16IS740/SC16IS750/SC16IS752,
 	serial UART chips connected via I2C or SPI.
 endef
@@ -52,4 +52,4 @@ define Build/Compile
 		modules
 endef
 
-$(eval $(call KernelPackage,$(PKG_NAME)))
+$(eval $(call KernelPackage,serial-sc16is7xx))

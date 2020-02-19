@@ -12,7 +12,7 @@ PKG_RELEASE:=1
 
 include $(INCLUDE_DIR)/package.mk
 
-define Package/$(PKG_NAME)
+define Package/ubertooth-firmware
   SECTION:=firmware
   CATEGORY:=Firmware
   TITLE:=Project Ubertooth firmware
@@ -22,11 +22,11 @@ define Build/Compile
 
 endef
 
-define Package/$(PKG_NAME)/install
+define Package/ubertooth-firmware/install
 	$(INSTALL_DIR) $(1)/lib/firmware/ubertooth
 	$(INSTALL_DATA) ./files/*.bin $(1)/lib/firmware/ubertooth
 	$(INSTALL_DATA) ./files/*.dfu $(1)/lib/firmware/ubertooth
 	$(INSTALL_DATA) ./files/*.hex $(1)/lib/firmware/ubertooth
 endef
 
-$(eval $(call BuildPackage,$(PKG_NAME)))
+$(eval $(call BuildPackage,ubertooth-firmware))

@@ -13,7 +13,7 @@ PKG_RELEASE:=16
 
 include $(INCLUDE_DIR)/package.mk
 
-define Package/$(PKG_NAME)
+define Package/cc2564-firmware
   SECTION:=firmware
   CATEGORY:=Firmware
   TITLE:=Texas Instruments cc2564 firmware
@@ -23,9 +23,9 @@ define Build/Compile
 
 endef
 
-define Package/$(PKG_NAME)/install
+define Package/cc2564-firmware/install
 	$(INSTALL_DIR) $(1)/lib/firmware/ti-connectivity
 	$(INSTALL_DATA) ./files/*.bts $(1)/lib/firmware/ti-connectivity
 endef
 
-$(eval $(call BuildPackage,$(PKG_NAME)))
+$(eval $(call BuildPackage,cc2564-firmware))

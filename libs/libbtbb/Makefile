@@ -12,13 +12,13 @@ PKG_HASH:=3e93a2b325f982dc585f734542bce4bc734f57f9a07066b47d96bed848f83327
 include $(INCLUDE_DIR)/package.mk
 include $(INCLUDE_DIR)/cmake.mk
 
-define Package/$(PKG_NAME)
+define Package/libbtbb
 	SECTION:=libs
 	CATEGORY:=Libraries
 	TITLE:=Bluetooth baseband decoding library
 endef
 
-define Package/$(PKG_NAME)/description
+define Package/libbtbb/description
 	This is the Bluetooth baseband decoding library, forked from the GR-Bluetooth project. 
 	It can be used to extract Bluetooth packet and piconet information from Ubertooth devices 
 	as well as GR-Bluetooth/USRP.
@@ -35,7 +35,7 @@ define Build/InstallDev
 	$(INSTALL_DATA) $(PKG_INSTALL_DIR)/usr/lib/pkgconfig/libbtbb.pc $(1)/usr/lib/pkgconfig/
 endef
 
-define Package/$(PKG_NAME)/install
+define Package/libbtbb/install
 	$(INSTALL_DIR) $(1)/usr/bin
 	$(INSTALL_BIN) $(PKG_INSTALL_DIR)/usr/bin/btaptap $(1)/usr/bin/
 	$(INSTALL_DIR) $(1)/usr/lib
@@ -44,5 +44,5 @@ define Package/$(PKG_NAME)/install
 	$(LN) libbtbb.so.1.0 $(1)/usr/lib/libbtbb.so
 endef
 
-$(eval $(call BuildPackage,$(PKG_NAME)))
+$(eval $(call BuildPackage,libbtbb))
 

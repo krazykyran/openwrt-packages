@@ -29,11 +29,11 @@ PKG_FIXUP:=autoreconf
 
 include $(INCLUDE_DIR)/package.mk
 
-define Package/$(PKG_NAME)/config
+define Package/modemmanager/config
   source "$(SOURCE)/Config.in"
 endef
 
-define Package/$(PKG_NAME)
+define Package/modemmanager
   SECTION:=net
   CATEGORY:=Network
   TITLE:=Control utility for any kind of mobile broadband modem
@@ -47,7 +47,7 @@ define Package/$(PKG_NAME)
 	+MODEMMANAGER_WITH_QMI:libqmi
 endef
 
-define Package/$(PKG_NAME)/description
+define Package/modemmanager/description
   ModemManager is a D-Bus-activated service which allows controlling mobile
   broadband modems. Add kernel modules for your modems as needed.
   Select Utilities/usb-modeswitch if needed.
@@ -96,7 +96,7 @@ define Build/InstallDev
 	$(CP) $(PKG_INSTALL_DIR)/usr/lib/pkgconfig/mm-glib.pc $(1)/usr/lib/pkgconfig
 endef
 
-define Package/$(PKG_NAME)/install
+define Package/modemmanager/install
 	$(INSTALL_DIR) $(1)/lib/udev/rules.d
 	$(INSTALL_DATA) $(PKG_INSTALL_DIR)/lib/udev/rules.d/*.rules $(1)/lib/udev/rules.d
 
@@ -139,4 +139,4 @@ define Package/$(PKG_NAME)/install
 	$(INSTALL_BIN) ./files/modemmanager.proto $(1)/lib/netifd/proto/modemmanager.sh
 endef
 
-$(eval $(call BuildPackage,$(PKG_NAME)))
+$(eval $(call BuildPackage,modemmanager))

@@ -13,7 +13,7 @@ PKG_RELEASE:=1
 
 include $(INCLUDE_DIR)/package.mk
 
-define KernelPackage/$(PKG_NAME)
+define KernelPackage/rtc-pcf8523
 	SUBMENU:=Other modules
 	TITLE:=NXP PCF8523 RTC support
 	DEPENDS:=+kmod-i2c-core
@@ -23,7 +23,7 @@ define KernelPackage/$(PKG_NAME)
 	AUTOLOAD:=$(call AutoProbe,rtc-pcf8523)
 endef
 
-define KernelPackage/$(PKG_NAME)/description
+define KernelPackage/rtc-pcf8523/description
 	Kernel module for NXP PCF8523 Real-Time Clock (RTC) 
 	and calendar device.
 endef
@@ -53,4 +53,4 @@ define Build/Compile
 		modules
 endef
 
-$(eval $(call KernelPackage,$(PKG_NAME)))
+$(eval $(call KernelPackage,rtc-pcf8523))

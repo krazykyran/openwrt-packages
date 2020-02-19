@@ -7,7 +7,7 @@ PKG_RELEASE:=1
 
 include $(INCLUDE_DIR)/package.mk
 
-define Package/$(PKG_NAME)
+define Package/linux-headers
   SECTION:=devel
   CATEGORY:=Development
   TITLE:=linux-headers (Development headers)
@@ -15,7 +15,7 @@ define Package/$(PKG_NAME)
   URL:=http://www.kernel.org/
 endef
 
-define Package/$(PKG_NAME)/description
+define Package/linux-headers/description
   linux-headers files for development
 endef
 
@@ -37,7 +37,7 @@ GCC_VERSION:=$(call qstrip,$(CONFIG_GCC_VERSION))
 # Same version as in feeds/packages/devel/gcc/Makefile
 GCC_VER:=7.3.0
 
-define Package/$(PKG_NAME)/install
+define Package/linux-headers/install
 	$(INSTALL_DIR) $(1)/usr/src/linux-$(LINUX_VERSION)
 	$(INSTALL_DIR) $(1)/lib/modules/$(LINUX_VERSION)
 	cp $(LINUX_DIR)/.config $(1)/usr/src/linux-$(LINUX_VERSION)
@@ -45,4 +45,4 @@ define Package/$(PKG_NAME)/install
 	$(LN) /usr/src/linux-$(LINUX_VERSION) $(1)/lib/modules/$(LINUX_VERSION)/build
 endef
 
-$(eval $(call BuildPackage,$(PKG_NAME)))
+$(eval $(call BuildPackage,linux-headers))

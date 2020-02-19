@@ -6,7 +6,7 @@ PKG_RELEASE:=1
 
 include $(INCLUDE_DIR)/package.mk
 
-define Package/$(PKG_NAME)
+define Package/edge-utils
   SECTION:=utils
   CATEGORY:=Utilities
   TITLE:=SAGE EDGE Utilities
@@ -17,10 +17,10 @@ define Build/Compile
 
 endef
 
-define Package/$(PKG_NAME)/install
+define Package/edge-utils/install
 	$(INSTALL_DIR) 	$(1)/usr/bin
 	$(INSTALL_BIN) 	./files/usr/bin/* $(1)/usr/bin
 endef
 
-$(eval $(call BuildPackage,$(PKG_NAME)))
+$(eval $(call BuildPackage,edge-utils))
 
