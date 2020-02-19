@@ -1,6 +1,7 @@
 #
 # Copyright (C) 2013 Riccardo Ferrazzo <f.riccardo87@gmail.com>
 # Copyright (C) 2017 Paweł Knioła <pawel.kn@gmail.com>
+# Copyright (C) 2020 Simon Crawley <simon.crawley@sageautomation.com>
 #
 # This is free software, licensed under the GNU General Public License v2.
 # See /LICENSE for more information.
