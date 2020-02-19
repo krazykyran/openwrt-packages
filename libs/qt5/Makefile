@@ -172,6 +172,7 @@ $(INSTALL_DIR) $(PKG_BUILD_DIR)/qtbase/lib/fonts
 			-make libs \
 			-nomake examples \
 			-nomake tests \
+			-nomake tools \
 			-skip qt3d \
 			-skip qtactiveqt \
 			-skip qtandroidextras \
