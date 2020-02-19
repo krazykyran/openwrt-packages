@@ -3,10 +3,11 @@ include $(TOPDIR)/rules.mk
 PKG_NAME:=libbtbb
 PKG_VERSION:=2018-12-R1
 
-PKG_BUILD_DIR:=$(BUILD_DIR)/$(PKG_NAME)-$(PKG_VERSION)
-PKG_SOURCE_PROTO:=git
-PKG_SOURCE_URL:=https://github.com/greatscottgadgets/libbtbb.git
+PKG_SOURCE:=$(PKG_VERSION).zip
+PKG_SOURCE_URL:=https://github.com/greatscottgadgets/libbtbb/archive
 PKG_SOURCE_VERSION:=2018-12-R1
+PKG_SOURCE_SUBDIR:=$(PKG_NAME)-$(PKG_VERSION)
+PKG_HASH:=3e93a2b325f982dc585f734542bce4bc734f57f9a07066b47d96bed848f83327
 
 include $(INCLUDE_DIR)/package.mk
 include $(INCLUDE_DIR)/cmake.mk
