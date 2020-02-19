@@ -145,6 +145,7 @@ $(INSTALL_DIR) $(PKG_BUILD_DIR)/qtbase/lib/fonts
 		CFLAGS="$(TARGET_CFLAGS) $(TARGET_CPPFLAGS)" \
 		CXXFLAGS= \
 		LDFLAGS= \
+		OPENSSL_LIBS="-L$(STAGING_DIR)/usr/lib -lssl -lcrypto" \
 		./configure \
 			-prefix /usr \
 			-extprefix $(TOOLCHAIN_DIR) \
@@ -166,7 +167,7 @@ $(INSTALL_DIR) $(PKG_BUILD_DIR)/qtbase/lib/fonts
 			-no-directfb \
 			-no-linuxfb \
 			-no-xcb \
-			-openssl \
+			-openssl-linked \
 			-system-zlib \
 			-qt-freetype \
 			-make libs \
