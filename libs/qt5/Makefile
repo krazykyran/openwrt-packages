@@ -58,6 +58,12 @@ define Package/qt5-dbus
   TITLE+=dbus
 endef
 
+define Package/qt5-gui
+  $(call Package/qt5/Default)
+  TITLE+=gui
+  DEPENDS+=+qt5-core +qt5-network +qt5-dbus
+endef
+
 define Package/qt5-network
   $(call Package/qt5/Default)
   TITLE+=network
@@ -69,7 +75,7 @@ define Package/qt5-sensors
   TITLE+=sensors
   DEPENDS+=+qt5-core +qt5-dbus
 endef
-			
+
 define Package/qt5-serialport
   $(call Package/qt5/Default)
   TITLE+=serialport
@@ -86,6 +92,12 @@ define Package/qt5-sql
   $(call Package/qt5/Default)
   TITLE+=sql
   DEPENDS+=+qt5-core
+endef
+
+define Package/qt5-widgets
+  $(call Package/qt5/Default)
+  TITLE+=widgets
+  DEPENDS+=+qt5-core +qt5-gui
 endef
 
 define Package/qt5-websockets
@@ -148,12 +160,13 @@ $(INSTALL_DIR) $(PKG_BUILD_DIR)/qtbase/lib/fonts
 			-no-strip \
 			-no-cups \
 			-no-eglfs \
+			-no-evdev \
 			-no-kms \
 			-no-opengl \
 			-no-directfb \
+			-no-linuxfb \
+			-no-vnc \
 			-no-xcb \
-			-no-gui \
-			-no-widgets \
 			-openssl \
 			-system-zlib \
 			-qt-freetype \
@@ -244,6 +257,13 @@ define Package/qt5-dbus/install
 	$(CP) $(PKG_BUILD_DIR)/qtbase/lib/libQt5DBus.la $(1)/usr/lib/
 endef
 
+define Package/qt5-gui/install
+	$(INSTALL_DIR) $(1)/usr/lib/
+	$(CP) $(PKG_BUILD_DIR)/qtbase/lib/libQt5Gui.so* $(1)/usr/lib/
+	$(CP) $(PKG_BUILD_DIR)/qtbase/lib/libQt5Gui.prl $(1)/usr/lib/
+	$(CP) $(PKG_BUILD_DIR)/qtbase/lib/libQt5Gui.la $(1)/usr/lib/
+endef
+
 define Package/qt5-network/install
 	$(INSTALL_DIR) $(1)/usr/lib/
 	$(CP) $(PKG_BUILD_DIR)/qtbase/lib/libQt5Network.so* $(1)/usr/lib/
@@ -295,6 +315,13 @@ define Package/qt5-websockets/install
 	$(CP) $(PKG_BUILD_DIR)/qtwebsockets/lib/libQt5WebSockets.la $(1)/usr/lib/
 endef
 
+define Package/qt5-widgets/install
+	$(INSTALL_DIR) $(1)/usr/lib/
+	$(CP) $(PKG_BUILD_DIR)/qtbase/lib/libQt5Widgets.so* $(1)/usr/lib/
+	$(CP) $(PKG_BUILD_DIR)/qtbase/lib/libQt5Widgets.prl $(1)/usr/lib/
+	$(CP) $(PKG_BUILD_DIR)/qtbase/lib/libQt5Widgets.la $(1)/usr/lib/
+endef
+
 define Package/qt5-xml/install
 	$(INSTALL_DIR) $(1)/usr/lib/
 	$(CP) $(PKG_BUILD_DIR)/qtbase/lib/libQt5Xml.so* $(1)/usr/lib/
@@ -312,6 +339,7 @@ endef
 $(eval $(call BuildPackage,qt5-core))
 $(eval $(call BuildPackage,qt5-concurrent))
 $(eval $(call BuildPackage,qt5-dbus))
+$(eval $(call BuildPackage,qt5-gui))
 $(eval $(call BuildPackage,qt5-network))
 $(eval $(call BuildPackage,qt5-sensors))
 $(eval $(call BuildPackage,qt5-serialport))
@@ -319,5 +347,6 @@ $(eval $(call BuildPackage,qt5-serialbus))
 $(eval $(call BuildPackage,qt5-sql))
 $(eval $(call BuildPackage,qt5-test))
 $(eval $(call BuildPackage,qt5-websockets))
+$(eval $(call BuildPackage,qt5-widgets))
 $(eval $(call BuildPackage,qt5-xml))
 $(eval $(call BuildPackage,qt5-xmlpatterns))
