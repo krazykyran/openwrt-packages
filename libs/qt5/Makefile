@@ -146,13 +146,42 @@ $(INSTALL_DIR) $(PKG_BUILD_DIR)/qtbase/lib/fonts
 			-make libs \
 			-nomake examples \
 			-nomake tests \
-			-skip qtdeclarative \
-			-skip qtmultimedia \
-			-skip activeqt \
-			-skip qtdoc \
-			-skip qtconnectivity \
-			-skip wayland \
-			-skip qtscript \
+			-skip qt3d
+			-skip qtactiveqt
+			-skip qtandroidextras
+			-skip qtcanvas3d
+			-skip qtcharts
+			-skip qtconnectivity
+			-skip qtdatavis3d
+			-skip qtdeclarative
+			-skip qtdoc
+			-skip qtgamepad
+			-skip qtgraphicaleffects
+			-skip qtimageformats
+			-skip qtlocation
+			-skip qtmacextras
+			-skip qtmultimedia
+			-skip qtnetworkauth
+			-skip qtpurchasing
+			-skip qtquickcontrols
+			-skip qtquickcontrols2
+			-skip qtremoteobjects
+			-skip qtscript
+			-skip qtscxml
+			-skip qtsensors
+			-skip qtspeech
+			-skip qtsvg
+			-skip qttools
+			-skip qttranslations
+			-skip qtvirtualkeyboard
+			-skip qtwayland
+			-skip qtwebchannel
+			-skip qtwebengine
+			-skip qtwebglplugin
+			-skip qtwebsockets
+			-skip qtwebview
+			-skip qtwinextras
+			-skip qtx11extras
 			-L$(STAGING_DIR)/usr/lib \
 			-v \
 	)
