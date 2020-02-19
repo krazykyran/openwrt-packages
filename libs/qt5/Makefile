@@ -196,6 +196,13 @@ define Package/qt5-concurrent/install
 	$(CP) $(PKG_BUILD_DIR)/qtbase/lib/libQt5Concurrent.la $(1)/usr/lib/
 endef
 
+define Package/qt5-dbus/install
+	$(INSTALL_DIR) $(1)/usr/lib/
+	$(CP) $(PKG_BUILD_DIR)/qtbase/lib/libQt5DBus.so* $(1)/usr/lib/
+	$(CP) $(PKG_BUILD_DIR)/qtbase/lib/libQt5DBus.prl $(1)/usr/lib/
+	$(CP) $(PKG_BUILD_DIR)/qtbase/lib/libQt5DBus.la $(1)/usr/lib/
+endef
+
 define Package/qt5-network/install
 	$(INSTALL_DIR) $(1)/usr/lib/
 	$(CP) $(PKG_BUILD_DIR)/qtbase/lib/libQt5Network.so* $(1)/usr/lib/
@@ -245,19 +252,6 @@ define Package/qt5-xmlpatterns/install
 	$(CP) $(PKG_BUILD_DIR)/qtxmlpatterns/lib/libQt5XmlPatterns.so* $(1)/usr/lib/
 	$(CP) $(PKG_BUILD_DIR)/qtxmlpatterns/lib/libQt5XmlPatterns.prl $(1)/usr/lib/
 	$(CP) $(PKG_BUILD_DIR)/qtxmlpatterns/lib/libQt5XmlPatterns.la $(1)/usr/lib/
-endef
-
-define Package/qt5-devel/install
-	$(INSTALL_DIR) $(1)/usr/lib/pkgconfig
-	$(CP) $(PKG_BUILD_DIR)/qtbase/lib/pkgconfig/Qt5Core.pc $(1)/usr/lib/pkgconfig/
-	$(CP) $(PKG_BUILD_DIR)/qtbase/lib/pkgconfig/Qt5Concurrent.pc $(1)/usr/lib/pkgconfig/
-	$(CP) $(PKG_BUILD_DIR)/qtbase/lib/pkgconfig/Qt5Network.pc $(1)/usr/lib/pkgconfig/
-	$(CP) $(PKG_BUILD_DIR)/qtserialport/lib/pkgconfig/Qt5SerialPort.pc $(1)/usr/lib/pkgconfig/
-	$(CP) $(PKG_BUILD_DIR)/qtserialbus/lib/pkgconfig/Qt5SerialBus.pc $(1)/usr/lib/pkgconfig/
-	$(CP) $(PKG_BUILD_DIR)/qtbase/lib/pkgconfig/Qt5Sql.pc $(1)/usr/lib/pkgconfig/
-	$(CP) $(PKG_BUILD_DIR)/qtbase/lib/pkgconfig/Qt5Test.pc $(1)/usr/lib/pkgconfig/
-	$(CP) $(PKG_BUILD_DIR)/qtbase/lib/pkgconfig/Qt5Xml.pc $(1)/usr/lib/pkgconfig/
-	$(CP) $(PKG_BUILD_DIR)/qtxmlpatterns/lib/pkgconfig/Qt5XmlPatterns.pc $(1)/usr/lib/pkgconfig/
 endef
 
 $(eval $(call BuildPackage,qt5-core))
