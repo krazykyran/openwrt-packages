@@ -156,7 +156,6 @@ $(INSTALL_DIR) $(PKG_BUILD_DIR)/qtbase/lib/fonts
 			-no-widgets \
 			-openssl \
 			-system-zlib \
-			-system-glib \
 			-qt-freetype \
 			-make libs \
 			-nomake examples \
