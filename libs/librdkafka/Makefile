@@ -9,11 +9,10 @@ include $(TOPDIR)/rules.mk
 PKG_NAME:=librdkafka
 PKG_VERSION:=0.11.3
 
-PKG_SOURCE:=v$(PKG_VERSION).zip
-PKG_SOURCE_URL:=https://github.com/edenhill/librdkafka/archive
-PKG_SOURCE_VERSION:=0.11.3
-PKG_SOURCE_SUBDIR:=$(PKG_NAME)-$(PKG_VERSION)
-PKG_HASH:=5da35f6a8c837bfb19dba31d4e2c377501703d6e4cbe8572028903bdbf4098ae
+PKG_BUILD_DIR=$(BUILD_DIR)/$(PKG_NAME)-$(PKG_VERSION)
+PKG_SOURCE_PROTO:=git
+PKG_SOURCE_URL:=https://github.com/edenhill/librdkafka.git
+PKG_SOURCE_VERSION:=v0.11.3
 PKG_INSTALL:=1
 PKG_FIXUP:=autoreconf
 

@@ -3,11 +3,10 @@ include $(TOPDIR)/rules.mk
 PKG_NAME:=ubertooth
 PKG_VERSION:=2018-12-R1
 
-PKG_SOURCE:=$(PKG_VERSION).zip
-PKG_SOURCE_URL:=https://github.com/greatscottgadgets/ubertooth/archive
+PKG_BUILD_DIR=$(BUILD_DIR)/$(PKG_NAME)-$(PKG_VERSION)
+PKG_SOURCE_PROTO:=git
+PKG_SOURCE_URL:=https://github.com/greatscottgadgets/ubertooth.git
 PKG_SOURCE_VERSION:=2018-12-R1
-PKG_SOURCE_SUBDIR:=$(PKG_NAME)-$(PKG_VERSION)
-PKG_HASH:=624c4c2248981d67c53fc609f2659772f9e7075e7f5d2a53371cb9b2e2442326
 PKG_BUILD_DEPENDS:=libbtbb bluez
 
 CMAKE_BINARY_SUBDIR:=host

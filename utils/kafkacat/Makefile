@@ -9,11 +9,10 @@ include $(TOPDIR)/rules.mk
 PKG_NAME:=kafkacat
 PKG_VERSION:=1.3.1
 
-PKG_SOURCE:=$(PKG_VERSION).zip
-PKG_SOURCE_URL:=https://github.com/edenhill/kafkacat/archive
+PKG_BUILD_DIR=$(BUILD_DIR)/$(PKG_NAME)-$(PKG_VERSION)
+PKG_SOURCE_PROTO:=git
+PKG_SOURCE_URL:=https://github.com/edenhill/kafkacat.git
 PKG_SOURCE_VERSION:=1.3.1
-PKG_SOURCE_SUBDIR:=$(PKG_NAME)-$(PKG_VERSION)
-PKG_HASH:=a1acc822efd9aebc460f0f7e7db2bb767591e770e3b15b1c3cd5f9732f066cb6
 PKG_BUILD_DEPENDS:=librdkafka
 PKG_FIXUP:=autoreconf
 
