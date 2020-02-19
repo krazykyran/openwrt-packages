@@ -56,6 +56,7 @@ endef
 define Package/qt5-dbus
   $(call Package/qt5/Default)
   TITLE+=dbus
+  DEPENDS+=+qt5-core
 endef
 
 define Package/qt5-gui
