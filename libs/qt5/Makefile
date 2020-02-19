@@ -9,19 +9,21 @@
 include $(TOPDIR)/rules.mk
 
 PKG_NAME:=qt5
-PKG_VERSION:=5.9
-PKG_RELEASE:=5
-PKG_MD5SUM:=0e6eaa2d118f9854345c2debb12e8536
+PKG_VERSION:=5.12
+PKG_RELEASE:=6
+PKG_MD5SUM:=287d71e71ebd97f77220873e7b131b1a
 
-PKG_SOURCE:=qt-everywhere-opensource-src-$(PKG_VERSION).$(PKG_RELEASE).tar.xz
-PKG_SOURCE_URL:=http://download.qt.io/archive/qt/$(PKG_VERSION)/$(PKG_VERSION).$(PKG_RELEASE)/single
-PKG_BUILD_DIR=$(BUILD_DIR)/qt-everywhere-opensource-src-$(PKG_VERSION).$(PKG_RELEASE)
+PKG_SOURCE:=qt-everywhere-src-$(PKG_VERSION).$(PKG_RELEASE).tar.xz
+PKG_SOURCE_URL:=http://download.qt-project.org/archive/qt/$(PKG_VERSION)/$(PKG_VERSION).$(PKG_RELEASE)/single
+PKG_BUILD_DIR=$(BUILD_DIR)/qt-everywhere-src-$(PKG_VERSION).$(PKG_RELEASE)
 PKG_BUILD_PARALLEL:=1
 PKG_USE_MIPS16:=0
 PKG_BUILD_DEPENDS:=libiconv
 
 include $(INCLUDE_DIR)/package.mk
 include $(INCLUDE_DIR)/nls.mk
+#include $(TARGET_LDFLAGS)/nls.mk
+
 #-include $(if $(DUMP),,./files/qmake.mk)
 
 # not using sstrip here as this fucks up the .so's somehow
@@ -38,55 +40,52 @@ define Package/qt5/Default
   SUBMENU:=Qt5
   TITLE:=qt5
   URL:=http://qt-project.org
-  DEPENDS:=@!LINUX_2_6
+  DEPENDS:=+librt +zlib +libstdcpp +libpcre16 +libpthread +libatomic @!LINUX_2_6
 endef
 
 define Package/qt5-core
   $(call Package/qt5/Default)
   TITLE+=core
-  DEPENDS+=+libc +libdouble-conversion +libgcc +glib2 +icu +libpcre2-16 +libstdcpp +zlib
 endef
 
 define Package/qt5-concurrent
   $(call Package/qt5/Default)
   TITLE+=concurrent
-  DEPENDS+=+libc +libgcc +qt5-core +libstdcpp
 endef
 
 define Package/qt5-dbus
   $(call Package/qt5/Default)
   TITLE+=dbus
-  DEPENDS+=+libc +dbus +libgcc +qt5-core +libstdcpp
 endef
 
 define Package/qt5-network
   $(call Package/qt5/Default)
   TITLE+=network
-  DEPENDS+=+libc +libgcc +qt5-core +libstdcpp +zlib
+  DEPENDS+=+qt5-core
 endef
 
 define Package/qt5-serialport
   $(call Package/qt5/Default)
   TITLE+=serialport
-  DEPENDS+=+libc +libgcc +qt5-core +libstdcpp +libudev-fbsd
+  DEPENDS+=+qt5-core
 endef
 
 define Package/qt5-serialbus
   $(call Package/qt5/Default)
   TITLE+=serialbus
-  DEPENDS+=+libc +libgcc +qt5-core +qt5-network +qt5-serialport +libstdcpp
+  DEPENDS+=+qt5-core +qt5-network +qt5-serialport
 endef
 
 define Package/qt5-sql
   $(call Package/qt5/Default)
   TITLE+=sql
-  DEPENDS+=+libc +libgcc +qt5-core +libstdcpp
+  DEPENDS+=+qt5-core
 endef
 
 define Package/qt5-xml
   $(call Package/qt5/Default)
   TITLE+=xml
-  DEPENDS+=+libc +libgcc +qt5-core +libstdcpp
+  DEPENDS+=+qt5-core
 endef
 
 define Package/qt5-xmlpatterns
@@ -98,21 +97,15 @@ endef
 define Package/qt5-test
   $(call Package/qt5/Default)
   TITLE+=test
-  DEPENDS+=+libc +libgcc +qt5-core +libstdcpp
-endef
-
-define Package/qt5-devel
-  $(call Package/qt5/Default)
-  TITLE+=devel
-  DEPENDS+=+qt5-core +qt5-concurrent +qt5-dbus +qt5-network +qt5-serialport +qt5-serialbus +qt5-sql +qt5-xml +qt5-xmlpatterns +qt5-test
+  DEPENDS+=+qt5-core
 endef
 
 define Build/Configure
-	$(INSTALL_DIR) $(PKG_BUILD_DIR)/qtbase/lib/fonts
+$(INSTALL_DIR) $(PKG_BUILD_DIR)/qtbase/lib/fonts
 	$(INSTALL_DIR) $(PKG_BUILD_DIR)/qtbase/mkspecs/linux-openwrt-g++
 	$(CP) ./files/fonts/* $(PKG_BUILD_DIR)/qtbase/lib/fonts/
-	$(CP) ./files/qmake.conf $(PKG_BUILD_DIR)/qtbase/mkspecs/linux-openwrt-g++/qmake.conf
 	$(CP) ./files/qplatformdefs.h $(PKG_BUILD_DIR)/qtbase/mkspecs/linux-openwrt-g++/qplatformdefs.h
+	$(CP) ./files/qmake.conf $(PKG_BUILD_DIR)/qtbase/mkspecs/linux-openwrt-g++/qmake.conf
 	$(SED) 's@$$$$(TARGET_CROSS)@$(TARGET_CROSS)@g' $(PKG_BUILD_DIR)/qtbase/mkspecs/linux-openwrt-g++/qmake.conf
 	( cd $(PKG_BUILD_DIR) ; \
 		TARGET_CC="$(TARGET_CROSS)gcc" \
@@ -125,7 +118,7 @@ define Build/Configure
 		TARGET_LDFLAGS="$(TARGET_LDFLAGS) $(EXTRA_LDFLAGS) -lpthread -lrt" \
 		TARGET_INCDIRS="$(TARGET_INCDIRS)" \
 		TARGET_LIBDIRS="$(TARGET_LIBDIRS) $(STAGING_DIR)/usr/lib/" \
-		CFLAGS= \
+		CFLAGS="$(TARGET_CFLAGS) $(TARGET_CPPFLAGS)" \
 		CXXFLAGS= \
 		LDFLAGS= \
 		./configure \
@@ -133,16 +126,13 @@ define Build/Configure
 			-extprefix $(TOOLCHAIN_DIR) \
 			-sysroot $(TOOLCHAIN_DIR) \
 			-plugindir /usr/lib/Qt/plugins \
-			-platform linux-g++ \
 			-xplatform linux-openwrt-g++ \
 			-opensource \
 			-confirm-license \
 			-force-asserts \
-			-no-ssl \
 			-no-iconv \
 			-no-pch \
 			-no-rpath \
-			-no-qml-debug \
 			-no-strip \
 			-no-cups \
 			-no-eglfs \
@@ -150,51 +140,20 @@ define Build/Configure
 			-no-opengl \
 			-no-directfb \
 			-no-xcb \
-			-no-gui \
-			-no-widgets \
-			-system-doubleconversion \
-			-system-pcre \
-			-qt-freetype \
+			-openssl \
 			-qt-zlib \
+			-qt-freetype \
 			-make libs \
 			-nomake examples \
-			-nomake tools \
 			-nomake tests \
-			-skip 3d \
+			-skip qtdeclarative \
+			-skip qtmultimedia \
 			-skip activeqt \
-			-skip androidextras \
-			-skip canvas3d \
-			-skip charts \
-			-skip connectivity \
-			-skip datavis3d \
-			-skip declarative \
-			-skip doc \
-			-skip gamepad \
-			-skip graphicaleffects \
-			-skip imageformats \
-			-skip location \
-			-skip macextras \
-			-skip multimedia \
-			-skip networkauth \
-			-skip purchasing \
-			-skip quickcontrols \
-			-skip quickcontrols2 \
-			-skip remoteobjects \
-			-skip script \
-			-skip scxml \
-			-skip sensors \
-			-skip speech \
-			-skip svg \
-			-skip tools \
-			-skip translations \
-			-skip virtualkeyboard \
+			-skip qtdoc \
+			-skip qtconnectivity \
 			-skip wayland \
-			-skip webchannel \
-			-skip webengine \
-			-skip websockets \
-			-skip webview \
-			-skip winextras \
-			-skip x11extras \
+			-skip qtscript \
+			-L$(STAGING_DIR)/usr/lib \
 			-v \
 	)
 endef
@@ -213,7 +172,8 @@ define Build/Compile
 	STAGING_DIR="$(STAGING_DIR)" \
 	STAGING_DIR_HOST="$(STAGING_DIR)/../host" \
 	PKG_CONFIG_SYSROOT="$(STAGING_DIR)" \
-	$(MAKE) $(PKG_JOBS) -C $(PKG_BUILD_DIR)
+	CFLAGS="$(TARGET_CFLAGS) $(TARGET_CPPFLAGS)" \
+	$(MAKE) -j4 -C $(PKG_BUILD_DIR)
 endef
 
 define Build/InstallDev
