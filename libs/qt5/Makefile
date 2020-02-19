@@ -64,6 +64,12 @@ define Package/qt5-network
   DEPENDS+=+qt5-core
 endef
 
+define Package/qt5-sensors
+  $(call Package/qt5/Default)
+  TITLE+=sensors
+  DEPENDS+=+qt5-core +qt5-dbus
+endef
+			
 define Package/qt5-serialport
   $(call Package/qt5/Default)
   TITLE+=serialport
@@ -80,6 +86,12 @@ define Package/qt5-sql
   $(call Package/qt5/Default)
   TITLE+=sql
   DEPENDS+=+qt5-core
+endef
+
+define Package/qt5-websockets
+  $(call Package/qt5/Default)
+  TITLE+=websockets
+  DEPENDS+=+qt5-core +qt5-network
 endef
 
 define Package/qt5-xml
@@ -146,42 +158,40 @@ $(INSTALL_DIR) $(PKG_BUILD_DIR)/qtbase/lib/fonts
 			-make libs \
 			-nomake examples \
 			-nomake tests \
-			-skip qt3d
-			-skip qtactiveqt
-			-skip qtandroidextras
-			-skip qtcanvas3d
-			-skip qtcharts
-			-skip qtconnectivity
-			-skip qtdatavis3d
-			-skip qtdeclarative
-			-skip qtdoc
-			-skip qtgamepad
-			-skip qtgraphicaleffects
-			-skip qtimageformats
-			-skip qtlocation
-			-skip qtmacextras
-			-skip qtmultimedia
-			-skip qtnetworkauth
-			-skip qtpurchasing
-			-skip qtquickcontrols
-			-skip qtquickcontrols2
-			-skip qtremoteobjects
-			-skip qtscript
-			-skip qtscxml
-			-skip qtsensors
-			-skip qtspeech
-			-skip qtsvg
-			-skip qttools
-			-skip qttranslations
-			-skip qtvirtualkeyboard
-			-skip qtwayland
-			-skip qtwebchannel
-			-skip qtwebengine
-			-skip qtwebglplugin
-			-skip qtwebsockets
-			-skip qtwebview
-			-skip qtwinextras
-			-skip qtx11extras
+			-skip qt3d \
+			-skip qtactiveqt \
+			-skip qtandroidextras \
+			-skip qtcanvas3d \
+			-skip qtcharts \
+			-skip qtconnectivity \
+			-skip qtdatavis3d \
+			-skip qtdeclarative \
+			-skip qtdoc \
+			-skip qtgamepad \
+			-skip qtgraphicaleffects \
+			-skip qtimageformats \
+			-skip qtlocation \
+			-skip qtmacextras \
+			-skip qtmultimedia \
+			-skip qtnetworkauth \
+			-skip qtpurchasing \
+			-skip qtquickcontrols \
+			-skip qtquickcontrols2 \
+			-skip qtremoteobjects \
+			-skip qtscript \
+			-skip qtscxml \
+			-skip qtspeech \
+			-skip qtsvg \
+			-skip qttools \
+			-skip qttranslations \
+			-skip qtvirtualkeyboard \
+			-skip qtwayland \
+			-skip qtwebchannel \
+			-skip qtwebengine \
+			-skip qtwebglplugin \
+			-skip qtwebview \
+			-skip qtwinextras \
+			-skip qtx11extras \
 			-L$(STAGING_DIR)/usr/lib \
 			-v \
 	)
@@ -239,6 +249,13 @@ define Package/qt5-network/install
 	$(CP) $(PKG_BUILD_DIR)/qtbase/lib/libQt5Network.la $(1)/usr/lib/
 endef
 
+define Package/qt5-sensors/install
+	$(INSTALL_DIR) $(1)/usr/lib/
+	$(CP) $(PKG_BUILD_DIR)/qtsensors/lib/libQt5Sensors.so* $(1)/usr/lib/
+	$(CP) $(PKG_BUILD_DIR)/qtsensors/lib/libQt5Sensors.prl $(1)/usr/lib/
+	$(CP) $(PKG_BUILD_DIR)/qtsensors/lib/libQt5Sensors.la $(1)/usr/lib/
+endef
+
 define Package/qt5-serialport/install
 	$(INSTALL_DIR) $(1)/usr/lib/
 	$(CP) $(PKG_BUILD_DIR)/qtserialport/lib/libQt5SerialPort.so* $(1)/usr/lib/
@@ -269,6 +286,13 @@ define Package/qt5-test/install
 	$(CP) $(PKG_BUILD_DIR)/qtbase/lib/libQt5Test.la $(1)/usr/lib/
 endef
 
+define Package/qt5-websockets/install
+	$(INSTALL_DIR) $(1)/usr/lib/
+	$(CP) $(PKG_BUILD_DIR)/qtwebsockets/lib/libQt5WebSockets.so* $(1)/usr/lib/
+	$(CP) $(PKG_BUILD_DIR)/qtwebsockets/lib/libQt5WebSockets.prl $(1)/usr/lib/
+	$(CP) $(PKG_BUILD_DIR)/qtwebsockets/lib/libQt5WebSockets.la $(1)/usr/lib/
+endef
+
 define Package/qt5-xml/install
 	$(INSTALL_DIR) $(1)/usr/lib/
 	$(CP) $(PKG_BUILD_DIR)/qtbase/lib/libQt5Xml.so* $(1)/usr/lib/
@@ -287,9 +311,11 @@ $(eval $(call BuildPackage,qt5-core))
 $(eval $(call BuildPackage,qt5-concurrent))
 $(eval $(call BuildPackage,qt5-dbus))
 $(eval $(call BuildPackage,qt5-network))
+$(eval $(call BuildPackage,qt5-sensors))
 $(eval $(call BuildPackage,qt5-serialport))
 $(eval $(call BuildPackage,qt5-serialbus))
 $(eval $(call BuildPackage,qt5-sql))
 $(eval $(call BuildPackage,qt5-test))
+$(eval $(call BuildPackage,qt5-websockets))
 $(eval $(call BuildPackage,qt5-xml))
 $(eval $(call BuildPackage,qt5-xmlpatterns))
