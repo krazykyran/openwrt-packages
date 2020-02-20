@@ -238,6 +238,8 @@ define Build/InstallDev
 	$(MAKE) -C $(PKG_BUILD_DIR) install
 	$(CP) $(PKG_BUILD_DIR)/qtbase/bin/qmake $(TOOLCHAIN_DIR)/bin/
 	$(CP) $(PKG_BUILD_DIR)/qtbase/bin/qt.conf $(TOOLCHAIN_DIR)/bin/
+	$(CP) $(PKG_BUILD_DIR)/qtbase/mkspecs $(STAGING_DIR)/usr/mkspecs
+	$(CP) ./files/qmake.mk $(INCLUDE_DIR)/qmake.mk
 endef
 
 define Package/qt5-core/install
