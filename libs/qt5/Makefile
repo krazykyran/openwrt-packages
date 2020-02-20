@@ -41,7 +41,7 @@ define Package/qt5/Default
   SUBMENU:=Qt5
   TITLE:=qt5
   URL:=http://qt-project.org
-  DEPENDS:=+librt +zlib +libstdcpp +libpcre16 +libpthread +libatomic +libopenssl @!LINUX_2_6
+  DEPENDS:=+librt +zlib +libstdcpp +libpcre16 +libpthread +libatomic @!LINUX_2_6
 endef
 
 define Package/qt5-core
@@ -64,13 +64,13 @@ endef
 define Package/qt5-gui
   $(call Package/qt5/Default)
   TITLE+=gui
-  DEPENDS+=+qt5-core +qt5-network +qt5-dbus
+  DEPENDS+=+qt5-core +qt5-network +qt5-dbus +libpng
 endef
 
 define Package/qt5-network
   $(call Package/qt5/Default)
   TITLE+=network
-  DEPENDS+=+qt5-core
+  DEPENDS+=+qt5-core +libopenssl
 endef
 
 define Package/qt5-sensors
