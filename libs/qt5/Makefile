@@ -52,6 +52,7 @@ endef
 define Package/qt5-concurrent
   $(call Package/qt5/Default)
   TITLE+=concurrent
+  DEPENDS+=+qt5-core
 endef
 
 define Package/qt5-dbus
