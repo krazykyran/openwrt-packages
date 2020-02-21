@@ -62,37 +62,6 @@ collector = m:section(TypedSection, "collector", "Data Collector")
 collector.addremove = false
 collector.anonymous = true
 
-collector_enabled = collector:option(Flag, "enabled", "Enable")
-collector_enabled.default = "true"
-collector_enabled.enabled = "true"
-collector_enabled.disabled = "false"
-collector_enabled.optional = false
-collector_enabled.rmempty = false
-
-collector_listen_ip = collector:option(Value, "listen_ip", "Listen Address", "Address to listen for scan results on")
-collector_listen_ip.default = "127.0.0.1"
-collector_listen_ip.size = 16
-collector_listen_ip.optional = false
-collector_listen_ip.rmempty = false
-
-collector_listen_port = collector:option(Value, "listen_port", "Listen Port", "Port to listen for scan results on")
-collector_listen_port.default = "2000"
-collector_listen_port.size = 6
-collector_listen_port.optional = false
-collector_listen_port.rmempty = false
-
-collector_server_ip = collector:option(Value, "server_ip", "Server Address", "Address to transmit scan results to")
-collector_server_ip.default = "127.0.0.1"
-collector_server_ip.size = 16
-collector_server_ip.optional = false
-collector_server_ip.rmempty = false
-
-collector_server_port = collector:option(Value, "server_port", "Server Port", "Port to transmit scan results to")
-collector_server_port.default = "2000"
-collector_server_port.size = 6
-collector_server_port.optional = false
-collector_server_port.rmempty = false
-
 addinsight = m:section(TypedSection, "addinsight", "Addinsight UDP")
 addinsight.addremove = false
 addinsight.anonymous = true
@@ -122,6 +91,13 @@ addinsight_server_port.size = 6
 addinsight_server_port.optional = false
 addinsight_server_port.rmempty = false
 
+addinsight_log_enabled = addinsight:option(Flag, "log_enabled", "Enable Logging")
+addinsight_log_enabled.default = "false"
+addinsight_log_enabled.enabled = "true"
+addinsight_log_enabled.disabled = "false"
+addinsight_log_enabled.optional = false
+addinsight_log_enabled.rmempty = false
+
 qtdf = m:section(TypedSection, "qtdf", "QLD TMR Data Format")
 qtdf.addremove = false
 qtdf.anonymous = true
@@ -132,6 +108,13 @@ qtdf_enabled.enabled = "true"
 qtdf_enabled.disabled = "false"
 qtdf_enabled.optional = false
 qtdf_enabled.rmempty = false
+
+qtdf_log_enabled = qtdf:option(Flag, "log_enabled", "Enable Logging")
+qtdf_log_enabled.default = "false"
+qtdf_log_enabled.enabled = "true"
+qtdf_log_enabled.disabled = "false"
+qtdf_log_enabled.optional = false
+qtdf_log_enabled.rmempty = false
 
 qtdf_log_path = qtdf:option(Value, "log_path", "Log file directory")
 qtdf_log_path.default = "/home/data"
