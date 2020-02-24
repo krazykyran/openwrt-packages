@@ -4,5 +4,6 @@
 START=99
 
 start() {
+	hciconfig hci0 up
 	btuart
 }
