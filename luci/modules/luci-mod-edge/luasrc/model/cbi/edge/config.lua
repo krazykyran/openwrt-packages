@@ -76,6 +76,13 @@ addinsight_log_enabled.disabled = "false"
 addinsight_log_enabled.optional = false
 addinsight_log_enabled.rmempty = false
 
+addinsight_immediate_mode = addinsight:option(Flag, "immediate_mode", "Transmit frames immediately", "Transmit Addinsight data (including duplicate detections) immediately upon incoming detection.")
+addinsight_immediate_mode.default = "false"
+addinsight_immediate_mode.enabled = "true"
+addinsight_immediate_mode.disabled = "false"
+addinsight_immediate_mode.optional = false
+addinsight_immediate_mode.rmempty = false
+
 addinsight_site_id = addinsight:option(Value, "site_id", "Site ID", "Site ID to report to the specified Addinsight server")
 addinsight_site_id.default = "1234"
 addinsight_site_id.size = 5
