@@ -58,10 +58,6 @@ general_wifi.disabled = "false"
 general_wifi.optional = false
 general_wifi.rmempty = false
 
-collector = m:section(TypedSection, "collector", "Data Collector")
-collector.addremove = false
-collector.anonymous = true
-
 addinsight = m:section(TypedSection, "addinsight", "Addinsight UDP")
 addinsight.addremove = false
 addinsight.anonymous = true
@@ -73,8 +69,15 @@ addinsight_enabled.disabled = "false"
 addinsight_enabled.optional = false
 addinsight_enabled.rmempty = false
 
+addinsight_log_enabled = addinsight:option(Flag, "log_enabled", "Enable Logging")
+addinsight_log_enabled.default = "true"
+addinsight_log_enabled.enabled = "true"
+addinsight_log_enabled.disabled = "false"
+addinsight_log_enabled.optional = false
+addinsight_log_enabled.rmempty = false
+
 addinsight_site_id = addinsight:option(Value, "site_id", "Site ID", "Site ID to report to the specified Addinsight server")
-addinsight_site_id.default = "9901"
+addinsight_site_id.default = "1234"
 addinsight_site_id.size = 5
 addinsight_site_id.optional = false
 addinsight_site_id.rmempty = false
@@ -90,13 +93,6 @@ addinsight_server_port.default = "2000"
 addinsight_server_port.size = 6
 addinsight_server_port.optional = false
 addinsight_server_port.rmempty = false
-
-addinsight_log_enabled = addinsight:option(Flag, "log_enabled", "Enable Logging")
-addinsight_log_enabled.default = "false"
-addinsight_log_enabled.enabled = "true"
-addinsight_log_enabled.disabled = "false"
-addinsight_log_enabled.optional = false
-addinsight_log_enabled.rmempty = false
 
 qtdf = m:section(TypedSection, "qtdf", "QLD TMR Data Format")
 qtdf.addremove = false
@@ -129,7 +125,7 @@ qtdf_device_id.optional = false
 qtdf_device_id.rmempty = false
 
 qtdf_device_desc = qtdf:option(Value, "device_desc", "Device Description", "Device description to report to the specified Kafka server")
-qtdf_device_desc.default = "DeviceDescription"
+qtdf_device_desc.default = "description"
 qtdf_device_desc.size = 32
 qtdf_device_desc.optional = false
 qtdf_device_desc.rmempty = false
