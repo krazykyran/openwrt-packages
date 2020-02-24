@@ -23,6 +23,8 @@ define Package/edge-utils/install
 	$(INSTALL_BIN) ./files/edge-config $(1)/usr/bin
 	$(INSTALL_DIR) $(1)/etc/init.d
 	$(INSTALL_BIN) ./files/btuart.init $(1)/etc/init.d/btuart
+	$(INSTALL_DIR) $(1)/etc/config
+	$(INSTALL_DATA) ./files/edge.conf $(1)/etc/config/edge
 endef
 
 $(eval $(call BuildPackage,edge-utils))
