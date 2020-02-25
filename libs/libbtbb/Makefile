@@ -35,8 +35,6 @@ define Build/InstallDev
 endef
 
 define Package/libbtbb/install
-	$(INSTALL_DIR) $(1)/usr/bin
-	$(INSTALL_BIN) $(PKG_INSTALL_DIR)/usr/bin/btaptap $(1)/usr/bin/
 	$(INSTALL_DIR) $(1)/usr/lib
 	$(INSTALL_DATA) $(PKG_INSTALL_DIR)/usr/lib/libbtbb.so.1.0 $(1)/usr/lib/
 	$(LN) libbtbb.so.1.0 $(1)/usr/lib/libbtbb.so.1
