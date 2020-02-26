@@ -24,8 +24,10 @@ define Build/Compile
 endef
 
 define Package/cc2564-firmware/install
+	$(INSTALL_DIR) $(1)/lib
+	$(INSTALL_DIR) $(1)/lib/firmware
 	$(INSTALL_DIR) $(1)/lib/firmware/ti-connectivity
-	$(INSTALL_DATA) ./files/*.bts $(1)/lib/firmware/ti-connectivity
+	$(INSTALL_DATA) ./files/lib/firmware/ti-connectivity/* $(1)/lib/firmware/ti-connectivity
 endef
 
 $(eval $(call BuildPackage,cc2564-firmware))
