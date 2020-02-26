@@ -23,10 +23,10 @@ define Build/Compile
 endef
 
 define Package/ubertooth-firmware/install
+	$(INSTALL_DIR) $(1)/lib
+	$(INSTALL_DIR) $(1)/lib/firmware
 	$(INSTALL_DIR) $(1)/lib/firmware/ubertooth
-	$(INSTALL_DATA) ./files/*.bin $(1)/lib/firmware/ubertooth
-	$(INSTALL_DATA) ./files/*.dfu $(1)/lib/firmware/ubertooth
-	$(INSTALL_DATA) ./files/*.hex $(1)/lib/firmware/ubertooth
+	$(INSTALL_DATA) ./files/lib/firmware/ubertooth/* $(1)/lib/firmware/ubertooth
 endef
 
 $(eval $(call BuildPackage,ubertooth-firmware))
