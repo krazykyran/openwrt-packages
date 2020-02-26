@@ -18,13 +18,14 @@ define Build/Compile
 endef
 
 define Package/edge-utils/install
-	$(INSTALL_DIR) $(1)/usr/bin
-	$(INSTALL_BIN) ./files/btuart $(1)/usr/bin
-	$(INSTALL_BIN) ./files/edge-config $(1)/usr/bin
-	$(INSTALL_DIR) $(1)/etc/init.d
-	$(INSTALL_BIN) ./files/btuart.init $(1)/etc/init.d/btuart
 	$(INSTALL_DIR) $(1)/etc/config
-	$(INSTALL_DATA) ./files/edge.conf $(1)/etc/config/edge
+	$(INSTALL_DATA) ./files/etc/config/* $(1)/etc/config/
+	$(INSTALL_DIR) $(1)/etc/init.d
+	$(INSTALL_BIN) ./files/etc/init.d/* $(1)/etc/init.d/
+	$(INSTALL_DIR) $(1)/etc/uci-defaults
+	$(INSTALL_DATA) ./files/etc/uci-defaults/* $(1)/etc/uci-defaults/
+	$(INSTALL_DIR) $(1)/usr/bin
+	$(INSTALL_BIN) ./files/usr/bin/* $(1)/usr/bin/
 endef
 
 $(eval $(call BuildPackage,edge-utils))
